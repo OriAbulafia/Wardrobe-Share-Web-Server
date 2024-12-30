@@ -9,8 +9,10 @@ const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const mongoose_1 = __importDefault(require("mongoose"));
 const body_parser_1 = __importDefault(require("body-parser"));
+const user_routes_1 = __importDefault(require("./routes/user_routes"));
 app.use(body_parser_1.default.json());
 app.use(body_parser_1.default.urlencoded({ extended: true }));
+app.use("/user", user_routes_1.default);
 const initApp = () => {
     return new Promise((resolve, reject) => {
         const db = mongoose_1.default.connection;

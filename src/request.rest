@@ -1,0 +1,49 @@
+### users api
+
+### register user
+
+POST http://localhost:3000/user/register
+Content-Type: application/json
+
+{
+  "username": "test",
+  "password": "test",
+  "email": "email",
+  "f_name": "f_name",
+  "l_name": "l_name",
+  "picture": "picture"
+}
+
+### login user
+
+POST http://localhost:3000/user/login
+Content-Type: application/json
+
+{
+  "username": "test",
+  "password": "test"
+}
+
+### get user
+
+GET http://localhost:3000/user/677314127cf87c9c5211d555
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzczMTQxMjdjZjg3YzljNTIxMWQ1NTUiLCJyYW5kb20iOjk3MDE5OCwiaWF0IjoxNzM1NTk1MjQ3LCJleHAiOjE3MzU1OTg4NDd9.c5vbB09LexZdXyR5q40kQJqFSPdQTC0yQQCmjBVXROc
+
+### update user
+
+PUT http://localhost:3000/user/update
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzczMTQxMjdjZjg3YzljNTIxMWQ1NTUiLCJyYW5kb20iOjk3MDE5OCwiaWF0IjoxNzM1NTk1MjQ3LCJleHAiOjE3MzU1OTg4NDd9.c5vbB09LexZdXyR5q40kQJqFSPdQTC0yQQCmjBVXROc
+Content-Type: application/json
+
+{
+    "username": "test",
+    "f_name": "f_name",
+    "l_name": "l_name",
+    "picture": "picture"
+}
+
+### delete user
+
+DELETE http://localhost:3000/user/delete
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzczMTQxMjdjZjg3YzljNTIxMWQ1NTUiLCJyYW5kb20iOjk3MDE5OCwiaWF0IjoxNzM1NTk1MjQ3LCJleHAiOjE3MzU1OTg4NDd9.c5vbB09LexZdXyR5q40kQJqFSPdQTC0yQQCmjBVXROc
+
