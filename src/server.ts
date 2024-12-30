@@ -4,9 +4,11 @@ import dotenv from "dotenv";
 dotenv.config();
 import mongoose from "mongoose";
 import bodyParser from "body-parser";
+import user_routes from "./routes/user_routes";
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use("/user", user_routes);
 
 
 const initApp = (): Promise<Express> => {
