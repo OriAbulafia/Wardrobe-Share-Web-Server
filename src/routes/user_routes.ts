@@ -12,9 +12,7 @@ router.post("/logout", userController.logout);
 
 router.post("/refresh", userController.refresh);
 
-router.get("/:id", authUser, (req: Request, res: Response) => {
-    userController.getUser(req, res);
-});
+router.get("/:id", userController.getUser);
 
 router.put("/update", authUser, (req: Request, res: Response) => {
     userController.updateUser(req, res);

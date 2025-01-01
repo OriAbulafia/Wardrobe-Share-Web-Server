@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import userModel from "../models/user_model";
+import postModel from "../models/post_model";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { Types } from "mongoose";
 
 type TokenPayload = {
   _id: string;
@@ -38,6 +40,7 @@ const register = async (req: Request, res: Response, next: Function) => {
     f_name: f_name,
     l_name: l_name,
     picture: picture,
+    likedPosts: [],
     refreshTokens: [],
   });
 
@@ -200,26 +203,27 @@ const refresh = async (req: Request, res: Response, next: Function) => {
 };
 
 const getUser = async (req: Request, res: Response) => {
-  const userId = req.query.userId;
-  if (!userId) {
-    res.status(400).send("missing user id");
-    return;
-  }
+  const userId = req.params.id;
+  try {
+    if (!userId) {
+      res.status(400).send("missing user id");
+      return;
+    }
 
-  const user = await userModel.findOne({ _id: userId });
-  if (!user) {
-    res.status(401).send("user does not exist");
-    return;
-  }
+    const user = await userModel.findOne({ _id: userId });
+    if (!user) {
+      res.status(401).send("user does not exist");
+      return;
+    }
 
-  res.status(200).send({
-    _id: user._id,
-    username: user.username,
-    email: user.email,
-    f_name: user.f_name,
-    l_name: user.l_name,
-    picture: user.picture,
-  });
+    res.status(200).send({
+      fullname: user.f_name + " " + user.l_name,
+      picture: user.picture,
+      
+    });
+  } catch (error) {
+    res.status(500).send("error");
+  }
 };
 
 const updateUser = async (req: Request, res: Response) => {
@@ -260,8 +264,28 @@ const deleteUser = async (req: Request, res: Response) => {
     return;
   }
 
-  await userModel.deleteOne({ _id: user._id });
+  if (user.likedPosts.length > 0) {
+    for (let i = 0; i < user.likedPosts.length; i++) {
+      const post = await postModel.findOne({ _id: user.likedPosts[i] });
+      if (post) {
+        post.likes = post.likes.filter((id) => id.toString() !== userId);
+        await post.save();
+      }
+    }
+  }
+
+  await postModel.deleteMany({ user: userId });
+  await userModel.deleteOne({ _id: userId });
+
   res.status(200).send("user deleted");
 };
 
-export default { register, login, logout, refresh, getUser, updateUser, deleteUser };
+export default {
+  register,
+  login,
+  logout,
+  refresh,
+  getUser,
+  updateUser,
+  deleteUser,
+};
