@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import postModel from "../models/post_model";
 import userModel from "../models/user_model";
+import commentModel from "../models/comment_model";
 import { Types } from "mongoose";
 
 const createPost = async (req: Request, res: Response) => {
@@ -34,10 +35,8 @@ const getAllPosts = async (req: Request, res: Response) => {
 
 const getPostById = async (req: Request, res: Response) => {
   const id = req.params.postId;
-  console.log(id);
   try {
     const data = await postModel.findById(id);
-    console.log(data);
     if (data) {
       return res.send(data);
     } else {
@@ -70,7 +69,11 @@ const updatePost = async (req: Request, res: Response) => {
 const deletePost = async (req: Request, res: Response) => {
   const id = req.params.postId;
   try {
-    await postModel.findByIdAndDelete(id);
+    await commentModel.deleteMany({ post: id });
+    const post = await postModel.findByIdAndDelete(id);
+    if (!post) {
+      return res.status(404).send("item not found");
+    }
     return res.send("item deleted");
   } catch (err) {
     return res.status(400).send(err);

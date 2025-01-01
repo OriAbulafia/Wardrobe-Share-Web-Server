@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import userModel from "../models/user_model";
 import postModel from "../models/post_model";
+import commentModel from "../models/comment_model";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Types } from "mongoose";
@@ -274,6 +275,7 @@ const deleteUser = async (req: Request, res: Response) => {
     }
   }
 
+  await commentModel.deleteMany({ user: userId });
   await postModel.deleteMany({ user: userId });
   await userModel.deleteOne({ _id: userId });
 
