@@ -6,11 +6,11 @@ POST http://localhost:3000/user/register
 Content-Type: application/json
 
 {
-  "username": "test",
+  "username": "11",
   "password": "test",
-  "email": "email",
-  "f_name": "f_name",
-  "l_name": "l_name",
+  "email": "11",
+  "f_name": "ori",
+  "l_name": "abulafia",
   "picture": "picture"
 }
 
@@ -20,23 +20,22 @@ POST http://localhost:3000/user/login
 Content-Type: application/json
 
 {
-  "username": "test",
+  "username": "11",
   "password": "test"
 }
 
 ### get user
 
-GET http://localhost:3000/user/677314127cf87c9c5211d555
-Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzczMTQxMjdjZjg3YzljNTIxMWQ1NTUiLCJyYW5kb20iOjk3MDE5OCwiaWF0IjoxNzM1NTk1MjQ3LCJleHAiOjE3MzU1OTg4NDd9.c5vbB09LexZdXyR5q40kQJqFSPdQTC0yQQCmjBVXROc
+GET http://localhost:3000/user/6773f44be2ceba6b9102d1df
 
 ### update user
 
 PUT http://localhost:3000/user/update
-Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzczMTQxMjdjZjg3YzljNTIxMWQ1NTUiLCJyYW5kb20iOjk3MDE5OCwiaWF0IjoxNzM1NTk1MjQ3LCJleHAiOjE3MzU1OTg4NDd9.c5vbB09LexZdXyR5q40kQJqFSPdQTC0yQQCmjBVXROc
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzczYWM3NWVhNDFmZDM3ZmZiNDA1ZDkiLCJyYW5kb20iOjM1MDEyMCwiaWF0IjoxNzM1NjM0MDQxLCJleHAiOjE3MzU2Mzc2NDF9.xVksTGXPndeOUBiASITlUc7AMqKZsjFYPb-kW_jJjxE
 Content-Type: application/json
 
 {
-    "username": "test",
+    "username": "Ori",
     "f_name": "f_name",
     "l_name": "l_name",
     "picture": "picture"
@@ -45,5 +44,55 @@ Content-Type: application/json
 ### delete user
 
 DELETE http://localhost:3000/user/delete
-Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzczMTQxMjdjZjg3YzljNTIxMWQ1NTUiLCJyYW5kb20iOjk3MDE5OCwiaWF0IjoxNzM1NTk1MjQ3LCJleHAiOjE3MzU1OTg4NDd9.c5vbB09LexZdXyR5q40kQJqFSPdQTC0yQQCmjBVXROc
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzczZWQ1YjRlZGY1MmI2NjNmYTFiMDciLCJyYW5kb20iOjI4NzI1NiwiaWF0IjoxNzM1NjUwODc2LCJleHAiOjE3MzU2NTQ0NzZ9.ZSs9QW9UTBBv_hZi4vyLbDvqpyMEg1nnypSol0bDwxI
+
+
+### posts api
+
+### create post
+POST http://localhost:3000/post
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzczZjQ0YmUyY2ViYTZiOTEwMmQxZGYiLCJyYW5kb20iOjMwNTUwOSwiaWF0IjoxNzM1NjUyNDMwLCJleHAiOjE3MzU2NTYwMzB9.fMEUPckqGGQj1Tg1UMnlAuXijiMh3953Mbsc-5h_xTk
+Content-Type: application/json
+
+{
+  "title": "Ori",
+  "description": "description",
+  "image": "image",
+  "phone": "phone",
+  "region": "region", 
+  "city": "city"
+}
+
+
+### get all posts
+GET http://localhost:3000/post
+
+
+### get all posts by user
+GET http://localhost:3000/post?user=6773d4c64552ddf233191d11
+
+
+### get post
+GET http://localhost:3000/post/6773d98d6e57863fb43237e6
+
+
+### like a post
+POST http://localhost:3000/post/6773ed6d4edf52b663fa1b0b/like
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzczZWQ1YjRlZGY1MmI2NjNmYTFiMDciLCJyYW5kb20iOjU4MjAzNSwiaWF0IjoxNzM1NjUwNjc2LCJleHAiOjE3MzU2NTQyNzZ9.uIoE9nWrudzv9_y02oEGjSDsxHPmhg7F-vjlhPih7NI
+
+
+### update post
+PUT http://localhost:3000/post/6773e7605559c4655526fd5d
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzczZWE1YWU2NzEwYzQ4NGQ1NGYzODYiLCJyYW5kb20iOjI0NDkyNywiaWF0IjoxNzM1NjQ5OTE2LCJleHAiOjE3MzU2NTM1MTZ9.7jLOyDRVbOoBFmf0e7-ffdN6Gm0HyI3f1XQYvBtd3Vc
+Content-Type: application/json
+
+{
+  "title": "Shirt",
+  "description": "123"
+}
+
+
+### delete post
+DELETE http://localhost:3000/post/6773ed6d4edf52b663fa1b0b
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzczZWQ1NTRlZGY1MmI2NjNmYTFiMDMiLCJyYW5kb20iOjk2MjkxMCwiaWF0IjoxNzM1NjUwODE1LCJleHAiOjE3MzU2NTQ0MTV9.Q2CaOkedyXsXh3zz8plFKRNSxafwLwJoaPqPeMgWCVs
 
