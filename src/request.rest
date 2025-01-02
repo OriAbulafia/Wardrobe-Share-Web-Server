@@ -24,6 +24,15 @@ Content-Type: application/json
   "password": "test"
 }
 
+### refresh token
+
+POST http://localhost:3000/user/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzczZjQ0YmUyY2ViYTZiOTEwMmQxZGYiLCJyYW5kb20iOjMzNDUyMiwiaWF0IjoxNzM1NzYxNzEwLCJleHAiOjE3MzYzNjY1MTB9.Rp7qFShzYblBBsFepy2ivu8p6qoplHyhwwrajGriIbA"
+}
+
 ### get user
 
 GET http://localhost:3000/user/6773f44be2ceba6b9102d1df
@@ -44,20 +53,21 @@ Content-Type: application/json
 ### delete user
 
 DELETE http://localhost:3000/user/delete
-Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzczZWQ1YjRlZGY1MmI2NjNmYTFiMDciLCJyYW5kb20iOjI4NzI1NiwiaWF0IjoxNzM1NjUwODc2LCJleHAiOjE3MzU2NTQ0NzZ9.ZSs9QW9UTBBv_hZi4vyLbDvqpyMEg1nnypSol0bDwxI
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzczZjQ0YmUyY2ViYTZiOTEwMmQxZGYiLCJyYW5kb20iOjI5MDExOSwiaWF0IjoxNzM1NzYxNzE5LCJleHAiOjE3MzU3NjUzMTl9.hQDIzAyd5cMa51DMRkTyxrwUOD55MUAbQIv7Wkk5gdk
 
 
 ### posts api
 
 ### create post
 POST http://localhost:3000/post
-Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzczZjQ0YmUyY2ViYTZiOTEwMmQxZGYiLCJyYW5kb20iOjMwNTUwOSwiaWF0IjoxNzM1NjUyNDMwLCJleHAiOjE3MzU2NTYwMzB9.fMEUPckqGGQj1Tg1UMnlAuXijiMh3953Mbsc-5h_xTk
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Nzc2YWNiODg0OTdmMTZjMTk1MzMxNjIiLCJyYW5kb20iOjI3NDQ2NiwiaWF0IjoxNzM1ODMwNzE0LCJleHAiOjE3MzU4MzQzMTR9.rQPIE9URFatnewV9A66i0CxopOR3Uli5K1qNYX6QcBI
 Content-Type: application/json
 
 {
   "title": "Ori",
   "description": "description",
   "image": "image",
+  "catagory": "catagory",
   "phone": "phone",
   "region": "region", 
   "city": "city"
@@ -66,6 +76,10 @@ Content-Type: application/json
 
 ### get all posts
 GET http://localhost:3000/post
+
+### get all posts by catagory
+
+GET http://localhost:3000/post?catagory=catagory
 
 
 ### get all posts by user
@@ -93,6 +107,47 @@ Content-Type: application/json
 
 
 ### delete post
-DELETE http://localhost:3000/post/6773ed6d4edf52b663fa1b0b
-Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzczZWQ1NTRlZGY1MmI2NjNmYTFiMDMiLCJyYW5kb20iOjk2MjkxMCwiaWF0IjoxNzM1NjUwODE1LCJleHAiOjE3MzU2NTQ0MTV9.Q2CaOkedyXsXh3zz8plFKRNSxafwLwJoaPqPeMgWCVs
+DELETE http://localhost:3000/post/6773f45ae2ceba6b9102d1e4
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzczZjQ0YmUyY2ViYTZiOTEwMmQxZGYiLCJyYW5kb20iOjI5MDExOSwiaWF0IjoxNzM1NzYxNzE5LCJleHAiOjE3MzU3NjUzMTl9.hQDIzAyd5cMa51DMRkTyxrwUOD55MUAbQIv7Wkk5gdk
+
+
+### comments api
+
+### create comment
+
+POST http://localhost:3000/comment
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzczZjQ0YmUyY2ViYTZiOTEwMmQxZGYiLCJyYW5kb20iOjI5MDExOSwiaWF0IjoxNzM1NzYxNzE5LCJleHAiOjE3MzU3NjUzMTl9.hQDIzAyd5cMa51DMRkTyxrwUOD55MUAbQIv7Wkk5gdk
+Content-Type: application/json
+
+{
+  "post": "6775a03dbd8da180466b5dab",
+  "content": "comment"
+}
+
+### get all comments by post
+
+GET http://localhost:3000/comment/post/6773f45ae2ceba6b9102d1e4
+
+
+### get comment by id 
+
+GET http://localhost:3000/comment/67759e613a4d2914e4de2222
+
+
+### update comment
+
+PUT http://localhost:3000/comment/67759e613a4d2914e4de2222
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzczZjQ0YmUyY2ViYTZiOTEwMmQxZGYiLCJyYW5kb20iOjI5MDExOSwiaWF0IjoxNzM1NzYxNzE5LCJleHAiOjE3MzU3NjUzMTl9.hQDIzAyd5cMa51DMRkTyxrwUOD55MUAbQIv7Wkk5gdk
+Content-Type: application/json
+
+{
+  "content": "elad"
+}
+
+### delete comment
+
+DELETE http://localhost:3000/comment/67759e613a4d2914e4de2222
+Authorization: JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NzczZjQ0YmUyY2ViYTZiOTEwMmQxZGYiLCJyYW5kb20iOjI5MDExOSwiaWF0IjoxNzM1NzYxNzE5LCJleHAiOjE3MzU3NjUzMTl9.hQDIzAyd5cMa51DMRkTyxrwUOD55MUAbQIv7Wkk5gdk
+
+
 

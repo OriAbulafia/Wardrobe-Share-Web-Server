@@ -112,7 +112,7 @@ const login = async (req: Request, res: Response) => {
 const logout = async (req: Request, res: Response, next: Function) => {
   const refreshToken = req.body.refreshToken;
   if (!refreshToken) {
-    res.status(400).send("missing refresh token");
+    res.status(402).send("missing refresh token");
     return;
   }
 
@@ -155,7 +155,7 @@ const logout = async (req: Request, res: Response, next: Function) => {
 const refresh = async (req: Request, res: Response, next: Function) => {
   const refreshToken = req.body.refreshToken;
   if (!refreshToken) {
-    res.status(400).send("invalid token");
+    res.status(402).send("invalid token");
     return;
   }
 
@@ -205,11 +205,6 @@ const refresh = async (req: Request, res: Response, next: Function) => {
 const getUser = async (req: Request, res: Response) => {
   const userId = req.params.id;
   try {
-    if (!userId) {
-      res.status(400).send("missing user id");
-      return;
-    }
-
     const user = await userModel.findOne({ _id: userId });
     if (!user) {
       res.status(401).send("user does not exist");
