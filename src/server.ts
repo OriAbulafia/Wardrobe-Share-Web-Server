@@ -7,11 +7,13 @@ import mongoose from "mongoose";
 import bodyParser from "body-parser";
 import user_routes from "./routes/user_routes";
 import post_routes from "./routes/post_routes";
+import comment_routes from "./routes/comment_routes";
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/user", user_routes);
 app.use("/post", post_routes);
+app.use("/comment", comment_routes);
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
   res.status(err.status || 500).send(err.message || "Internal Server Error");
