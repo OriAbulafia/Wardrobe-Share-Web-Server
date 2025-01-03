@@ -8,9 +8,10 @@
     "dev": "tsc && nodemon ./src/app.ts",
     "test": " tsc && jest --detectOpenHandles --forceExit --coverage --runInBand",
     "testAuth": "tsc && jest --detectOpenHandles --forceExit authmiddleware.test.ts --coverage",
-    "testUser": "tsc && jest --detectOpenHandles --forceExit user.test.ts --coverage"
+    "testUser": "tsc && jest --detectOpenHandles --forceExit user.test.ts --coverage",
+    "testPost": "tsc && jest --detectOpenHandles --forceExit post.test.ts --coverage"
   },
-  "author": "Ori Abulafia",
+  "author": "Wardrobe-Share",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",

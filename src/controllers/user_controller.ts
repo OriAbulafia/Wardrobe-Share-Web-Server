@@ -3,7 +3,6 @@ import userModel from "../models/user_model";
 import postModel from "../models/post_model";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { Types } from "mongoose";
 
 type TokenPayload = {
   _id: string;
@@ -22,11 +21,12 @@ const register = async (req: Request, res: Response, next: Function) => {
     return;
   }
 
-  if (
-    (await userModel.findOne({ email: email })) ||
-    (await userModel.findOne({ username: username }))
-  ) {
-    res.status(401).send("user already exists");
+  if (await userModel.findOne({ email: email })) {
+    res.status(401).send("email already exists");
+    return;
+  }
+  if (await userModel.findOne({ username: username })) {
+    res.status(402).send("username already exists");
     return;
   }
 
@@ -214,7 +214,6 @@ const getUser = async (req: Request, res: Response) => {
     res.status(200).send({
       fullname: user.f_name + " " + user.l_name,
       picture: user.picture,
-      
     });
   } catch (error) {
     res.status(500).send("error");
