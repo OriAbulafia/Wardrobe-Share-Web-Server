@@ -203,7 +203,7 @@ const refresh = async (req: Request, res: Response, next: Function) => {
 };
 
 const getUser = async (req: Request, res: Response) => {
-  const userId = req.params.id;
+  const userId = req.params.userId;
   try {
     const user = await userModel.findOne({ _id: userId });
     if (!user) {
@@ -218,6 +218,21 @@ const getUser = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(500).send("error");
   }
+};
+
+const getSettings = async (req: Request, res: Response) => {
+  const userId = req.query.userId;
+  const user = await userModel.findOne({ _id: userId });
+  if (!user) {
+    res.status(400).send("user not found");
+    return;
+  }
+  res.status(200).send({
+    username: user.username,
+    f_name: user.f_name,
+    l_name: user.l_name,
+    picture: user.picture,
+  });
 };
 
 const updateUser = async (req: Request, res: Response) => {
@@ -280,6 +295,7 @@ export default {
   logout,
   refresh,
   getUser,
+  getSettings,
   updateUser,
   deleteUser,
 };
