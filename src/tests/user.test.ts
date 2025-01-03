@@ -273,6 +273,27 @@ describe("Users Tests", () => {
     const response = await request(app).get("/user/" + userInfo._id);
     expect(response.status).toBe(401);
   });
+  test("Get user settings success - should return 200 if users are found", async () => {
+    const response3 = await request(app).post("/user/register").send(userInfo);
+    expect(response3.status).toBe(200);
+    const response = await request(app).post("/user/login").send({
+      username: userInfo.username,
+      password: userInfo.password,
+    });
+    expect(response.status).toBe(200);
+    userInfo.accessToken = response.body.accessToken;
+    const response2 = await request(app)
+      .get("/user/auth/settings")
+      .set("Authorization", "JWT " + userInfo.accessToken);
+    expect(response2.status).toBe(200);
+    await userModel.deleteMany();
+  });
+  test("Get user settings fail - should return 400 if user does not exist", async () => {
+    const response3 = await request(app)
+      .get("/user/auth/settings")
+      .set("Authorization", "JWT " + userInfo.accessToken);
+    expect(response3.status).toBe(400);
+  });
   test("Update user fail - should return 400 if user does not exist", async () => {
     const response = await request(app).post("/user/register").send(userInfo);
     userInfo._id = response.body._id;
