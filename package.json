@@ -9,7 +9,8 @@
     "test": " tsc && jest --detectOpenHandles --forceExit --coverage --runInBand",
     "testAuth": "tsc && jest --detectOpenHandles --forceExit authmiddleware.test.ts --coverage",
     "testUser": "tsc && jest --detectOpenHandles --forceExit user.test.ts --coverage",
-    "testPost": "tsc && jest --detectOpenHandles --forceExit post.test.ts --coverage"
+    "testPost": "tsc && jest --detectOpenHandles --forceExit post.test.ts --coverage",
+    "testComment": "tsc && jest --detectOpenHandles --forceExit comment.test.ts --coverage"
   },
   "author": "Wardrobe-Share",
   "license": "ISC",
