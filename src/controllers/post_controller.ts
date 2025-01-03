@@ -34,10 +34,8 @@ const getAllPosts = async (req: Request, res: Response) => {
 
 const getPostById = async (req: Request, res: Response) => {
   const id = req.params.postId;
-  console.log(id);
   try {
     const data = await postModel.findById(id);
-    console.log(data);
     if (data) {
       return res.send(data);
     } else {
@@ -82,45 +80,38 @@ const likePost = async (req: Request, res: Response) => {
   const userId = req.query.userId as string;
   let flag = false;
 
-  try {
-    const post = await postModel.findById(postId);
-    const user = await userModel.findById(userId);
+  const post = await postModel.findById(postId);
+  const user = await userModel.findById(userId);
 
-    if (!user) {
-      return res.status(403).send("User not found");
-    }
+  if (!user) {
+    return res.status(403).send("User not found");
+  }
 
-    if (!post) {
-      return res.status(404).send("Post not found");
-    }
+  if (!post) {
+    return res.status(404).send("Post not found");
+  }
 
-    const u_id = new Types.ObjectId(userId);
-    const p_id = new Types.ObjectId(postId);
+  const u_id = new Types.ObjectId(userId);
+  const p_id = new Types.ObjectId(postId);
 
-    if (post.likes.includes(u_id)) {
-      // Unlike the post
-      post.likes = post.likes.filter((id) => id.toString() !== userId);
-      user.likedPosts = user.likedPosts.filter(
-        (id) => id.toString() !== postId
-      );
-      flag = true;
-    } else {
-      // Like the post
-      post.likes.push(u_id);
-      user.likedPosts.push(p_id);
-    }
+  if (post.likes.includes(u_id)) {
+    // Unlike the post
+    post.likes = post.likes.filter((id) => id.toString() !== userId);
+    user.likedPosts = user.likedPosts.filter((id) => id.toString() !== postId);
+    flag = true;
+  } else {
+    // Like the post
+    post.likes.push(u_id);
+    user.likedPosts.push(p_id);
+  }
 
-    await post.save();
-    await user.save();
+  await post.save();
+  await user.save();
 
-    if (flag) {
-      return res.send("Post unliked"); 
-    } else {
-      return res.send("Post liked");
-    }
-
-  } catch (err) {
-    return res.status(400);
+  if (flag) {
+    return res.send("Post unliked");
+  } else {
+    return res.send("Post liked");
   }
 };
 

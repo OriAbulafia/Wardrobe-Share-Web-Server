@@ -19,6 +19,30 @@ type UserInfo = {
   refreshTokens?: string;
   _id?: string;
 };
+
+type PostInfo = {
+  user?: string;
+  title: string;
+  description: string;
+  image: string;
+  likes?: string[];
+  catagoery: string;
+  phone: string;
+  region: string;
+  city: string;
+  _id?: string;
+};
+
+const postInfo: PostInfo = {
+  title: "testtitle",
+  description: "testdescription",
+  image: "testimage",
+  catagoery: "testcatagoery",
+  phone: "testphone",
+  region: "testregion",
+  city: "testcity",
+};
+
 const userInfo: UserInfo = {
   username: "testuser",
   password: "testpassword",
@@ -42,6 +66,8 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  await userModel.deleteMany();
+  await postModel.deleteMany();
   await mongoose.connection.close();
 });
 
@@ -55,10 +81,25 @@ describe("Users Tests", () => {
     });
     expect(response.status).toBe(400);
   });
-  test("register fail - should return 401 if user already exists", async () => {
+  test("register fail - should return 401 if email already exist", async () => {
     await request(app).post("/user/register").send(userInfo);
     const response = await request(app).post("/user/register").send(userInfo);
     expect(response.status).toBe(401);
+    await userModel.deleteMany();
+  });
+  test("register fail - should return 402 if username already exist", async () => {
+    await request(app).post("/user/register").send(userInfo);
+    const response = await request(app)
+      .post("/user/register")
+      .send({
+        username: userInfo.username,
+        password: userInfo.password,
+        email: userInfo.email + "wrong",
+        f_name: userInfo.f_name,
+        l_name: userInfo.l_name,
+        picture: userInfo.picture,
+      });
+    expect(response.status).toBe(402);
     await userModel.deleteMany();
   });
   test("register success - should return 200 if user is created", async () => {
@@ -299,33 +340,17 @@ describe("Users Tests", () => {
     userInfo.accessToken = response.body.accessToken;
     const response2 = await request(app)
       .post("/post")
-      .set("Authorization", "JWT " + userInfo.accessToken)
-      .send({
-        title: "Ori",
-        description: "description",
-        image: "image",
-        catagory: "catagory",
-        phone: "phone",
-        region: "region",
-        city: "city",
-      });
-    const postId = response2.body._id;
+      .set("Authorization", `JWT ${userInfo.accessToken}`)
+      .send(postInfo);
+    postInfo._id = response2.body._id;
     await request(app)
-      .post("/post/" + postId + "/like")
-      .set("Authorization", "JWT " + userInfo.accessToken);
-    const post = await postModel.findById(postId);
-    if (post) {
-      expect(post.likes.length).toBe(1);
-    }
+      .post(`/post/${postInfo._id}/like`)
+      .set("Authorization", `JWT ${userInfo.accessToken}`);
     const response3 = await request(app)
       .delete("/user/delete")
       .set("Authorization", "JWT " + userInfo.accessToken);
     expect(response3.status).toBe(200);
-    const post2 = await postModel.findById(postId);
-    if (post2) {
-      expect(post2.likes.length).toBe(0);
-    }
-    await userModel.deleteMany();
-    await postModel.deleteMany();
+    const response4 = await request(app).get("/post/" + postInfo._id);
+    expect(response4.status).toBe(404);
   });
 });
