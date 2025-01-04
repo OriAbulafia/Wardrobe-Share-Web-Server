@@ -1,5 +1,6 @@
 import userPaths from "./user_routes_paths";
 import postPaths from "./post_routes_paths";
+import commentPaths from "./comment_routes_paths";
 import Components from "./components";
 
 const options = {
@@ -28,8 +29,12 @@ const options = {
       name: "Posts",
       description: "Operations about posts",
     },
+    {
+      name: "Comments",
+      description: "Operations about comments",
+    },
   ],
-  paths: { ...userPaths, ...postPaths },
+  paths: { ...userPaths, ...postPaths, ...commentPaths },
   components: Components,
 };
 
