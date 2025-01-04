@@ -12,14 +12,18 @@ router.post("/logout", userController.logout);
 
 router.post("/refresh", userController.refresh);
 
-router.get("/:id", userController.getUser);
+router.get("/:userId", userController.getUser);
+
+router.get("/auth/settings", authUser, (req: Request, res: Response) => {
+  userController.getSettings(req, res);
+});
 
 router.put("/update", authUser, (req: Request, res: Response) => {
-    userController.updateUser(req, res);
+  userController.updateUser(req, res);
 });
 
 router.delete("/delete", authUser, (req: Request, res: Response) => {
-    userController.deleteUser(req, res);
+  userController.deleteUser(req, res);
 });
 
 export default router;

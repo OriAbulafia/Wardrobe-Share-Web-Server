@@ -8,6 +8,8 @@ import bodyParser from "body-parser";
 import user_routes from "./routes/user_routes";
 import post_routes from "./routes/post_routes";
 import comment_routes from "./routes/comment_routes";
+import swaggerUI from "swagger-ui-express";
+import specs from "./doc/swagger";
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -19,6 +21,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   res.status(err.status || 500).send(err.message || "Internal Server Error");
 });
 
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
 
 const initApp = (): Promise<Express> => {
   return new Promise<Express>((resolve, reject) => {
