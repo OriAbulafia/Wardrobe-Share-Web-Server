@@ -13,6 +13,12 @@ import specs from "./doc/swagger";
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use((req: Request, res: Response, next: NextFunction) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "*");
+  res.header("Access-Control-Allow-Headers", "*");
+  next();
+});
 app.use("/user", user_routes);
 app.use("/post", post_routes);
 app.use("/comment", comment_routes);
