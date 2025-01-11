@@ -2,9 +2,7 @@ import request from "supertest";
 import initApp from "../server";
 import mongoose from "mongoose";
 import { Express } from "express";
-import userModel from "../models/user_model";
-import postModel from "../models/post_model";
-import commentModel from "../models/comment_model";
+import path from "path";
 
 let app: Express;
 
@@ -14,7 +12,6 @@ type UserInfo = {
   email: string;
   f_name: string;
   l_name: string;
-  picture: string;
   likedPosts?: string[];
   accessToken?: string;
   refreshTokens?: string;
@@ -25,9 +22,8 @@ type PostInfo = {
   user?: string;
   title: string;
   description: string;
-  image: string;
   likes?: string[];
-  catagoery: string;
+  category: string;
   phone: string;
   region: string;
   city: string;
@@ -48,8 +44,7 @@ const commentInfo: CommentInfo = {
 const postInfo: PostInfo = {
   title: "testtitle",
   description: "testdescription",
-  image: "testimage",
-  catagoery: "testcatagoery",
+  category: "testcategory",
   phone: "testphone",
   region: "testregion",
   city: "testcity",
@@ -61,14 +56,22 @@ const userInfo: UserInfo = {
   email: "testemail",
   f_name: "testf_name",
   l_name: "testl_name",
-  picture: "testpicture",
 };
 
 const fakeId = "60f7b4f3bbedb00000000000";
 
+const imagePath = path.join(__dirname, "assets", "trash.png");
+
 beforeAll(async () => {
   app = await initApp();
-  const response = await request(app).post("/user/register").send(userInfo);
+  const response = await request(app)
+    .post("/user/register")
+    .field("f_name", userInfo.f_name)
+    .field("l_name", userInfo.l_name)
+    .field("email", userInfo.email)
+    .field("username", userInfo.username)
+    .field("password", userInfo.password)
+    .attach("picture", imagePath);
   userInfo._id = response.body._id;
   const response2 = await request(app).post("/user/login").send({
     username: userInfo.username,
@@ -77,16 +80,20 @@ beforeAll(async () => {
   userInfo.accessToken = response2.body.accessToken;
   const response3 = await request(app)
     .post("/post")
-    .set("Authorization", "JWT " + userInfo.accessToken)
-    .send(postInfo);
+    .set("Authorization", `JWT ${userInfo.accessToken}`)
+    .field("title", postInfo.title)
+    .field("description", postInfo.description)
+    .field("category", postInfo.category)
+    .field("phone", postInfo.phone)
+    .field("region", postInfo.region)
+    .field("city", postInfo.city)
+    .attach("picture", imagePath);
   postInfo._id = response3.body._id;
   commentInfo.post = postInfo._id;
 });
 
 afterAll(async () => {
-  await userModel.deleteMany();
-  await postModel.deleteMany();
-  await commentModel.deleteMany();
+  await request(app).delete('/user/delete').set('Authorization', `JWT ${userInfo.accessToken}`);
   await mongoose.connection.close();
 });
 

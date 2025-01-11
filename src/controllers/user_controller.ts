@@ -1,8 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import userModel from "../models/user_model";
 import postModel from "../models/post_model";
+import commentModel from "../models/comment_model";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { v4 as uuid } from "uuid";
+import { OAuth2Client } from "google-auth-library";
+import { deleteFileFromPath } from "../utils/functions";
 
 type TokenPayload = {
   _id: string;
@@ -14,37 +18,120 @@ const register = async (req: Request, res: Response, next: Function) => {
   const email = req.body.email;
   const f_name = req.body.f_name;
   const l_name = req.body.l_name;
-  const picture = req.body.picture;
 
   if (!username || !password || !email || !f_name || !l_name) {
     res.status(400).send("missing fields");
+    await deleteFileFromPath(req.file?.path);
     return;
   }
 
   if (await userModel.findOne({ email: email })) {
     res.status(401).send("email already exists");
+    await deleteFileFromPath(req.file?.path);
     return;
   }
   if (await userModel.findOne({ username: username })) {
     res.status(402).send("username already exists");
+    await deleteFileFromPath(req.file?.path);
     return;
   }
 
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
-  const user = await userModel.create({
+  const newUser = await userModel.create({
     username: username,
     password: hashedPassword,
     email: email,
     f_name: f_name,
     l_name: l_name,
-    picture: picture,
+    picture: req.file ? req.file.path : null,
     likedPosts: [],
     refreshTokens: [],
   });
 
-  res.status(200).send(user);
+  const userId: string = newUser._id.toString();
+  const tokens = generateTokens(userId);
+
+  if (tokens) {
+    newUser.refreshTokens.push(tokens.refreshToken);
+    await newUser.save();
+    res.status(200).send({
+      user: newUser,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    });
+  }
+};
+
+const googleLogin = async (req: Request, res: Response): Promise<void> => {
+  const client = new OAuth2Client(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    "postmessage"
+  );
+  const { code }: { code: string } = req.body;
+  try {
+    if (!code) {
+      res.status(400).send("Invalid code");
+      return;
+    }
+    const response = await client.getToken(code);
+    const ticket = await client.verifyIdToken({
+      idToken: response.tokens.id_token!,
+      audience: process.env.GOOGLE_CLIENT_ID!,
+    });
+
+    const payload = ticket.getPayload();
+    if (!payload) {
+      res.status(400).send("Invalid payload");
+      return;
+    }
+
+    const email = payload.email;
+    if (!email) {
+      res.status(400).send("Invalid email");
+      return;
+    }
+    const user = await userModel.findOne({
+      email: { $regex: new RegExp(`^${email}$`, "i") },
+    });
+    if (!user) {
+      const newUser = await userModel.create({
+        username: uuid(),
+        password: uuid(),
+        email: email,
+        f_name: payload.given_name,
+        l_name: payload.family_name,
+        picture: payload.picture,
+        likedPosts: [],
+        refreshTokens: [],
+      });
+      const tokens = generateTokens(newUser._id.toString());
+      if (tokens) {
+        newUser.refreshTokens.push(tokens.refreshToken);
+        await newUser.save();
+        res.status(200).send({
+          user: newUser,
+          accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken,
+        });
+      }
+    } else {
+      const tokens = generateTokens(user._id.toString());
+      if (tokens) {
+        user.refreshTokens.push(tokens.refreshToken);
+        await user.save();
+        res.status(200).send({
+          user: user,
+          accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken,
+        });
+      }
+    }
+  } catch (error: any) {
+    res.status(500).send(error.message);
+  }
 };
 
 const generateTokens = (
@@ -240,10 +327,10 @@ const updateUser = async (req: Request, res: Response) => {
   const username = req.body.username;
   const f_name = req.body.f_name;
   const l_name = req.body.l_name;
-  const picture = req.body.picture;
   const user = await userModel.findOne({ _id: userId });
   if (!user) {
     res.status(400).send("user not found");
+    await deleteFileFromPath(req.file?.path);
     return;
   }
   if (username) {
@@ -251,14 +338,20 @@ const updateUser = async (req: Request, res: Response) => {
       const userExists = await userModel.findOne({ username: username });
       if (userExists) {
         res.status(401).send("username already exists");
+        await deleteFileFromPath(req.file?.path);
         return;
       }
       user.username = username;
     }
   }
+  let picture: string | undefined | null = user.picture;
+  if (req.file) {
+    await deleteFileFromPath(user.picture);
+    picture = req.file.path;
+    user.picture = picture;
+  }
   if (f_name) user.f_name = f_name;
   if (l_name) user.l_name = l_name;
-  if (picture) user.picture = picture;
 
   await user.save();
   res.status(200).send("user updated");
@@ -283,7 +376,16 @@ const deleteUser = async (req: Request, res: Response) => {
     }
   }
 
-  await postModel.deleteMany({ user: userId });
+  while (await postModel.findOne({ user: userId })) {
+    const post = await postModel.findOne({ user: userId });
+    if (post) {
+      await deleteFileFromPath(post.picture);
+      await postModel.deleteOne({ _id: post._id });
+    }
+  }
+
+  await deleteFileFromPath(user.picture);
+  await commentModel.deleteMany({ user: userId });
   await userModel.deleteOne({ _id: userId });
 
   res.status(200).send("user deleted");
@@ -291,6 +393,7 @@ const deleteUser = async (req: Request, res: Response) => {
 
 export default {
   register,
+  googleLogin,
   login,
   logout,
   refresh,
