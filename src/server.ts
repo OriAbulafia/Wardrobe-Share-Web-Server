@@ -15,7 +15,7 @@ import "./types/types";
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use("/uploads", express.static("uploads"));
+// app.use("/uploads", express.static("uploads"));
 
 app.use("/user", user_routes);
 app.use("/post", post_routes);

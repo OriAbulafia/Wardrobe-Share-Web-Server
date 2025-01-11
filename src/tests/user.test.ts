@@ -167,7 +167,7 @@ describe("Users Tests", () => {
   });
   test("logout fail - should return 400 if the token is of deleted user", async () => {
     await request(app).delete("/user/delete")
-    .set("Authorization", "JWT " + userInfo.accessToken);
+      .set("Authorization", "JWT " + userInfo.accessToken);
     const response2 = await request(app)
       .post("/user/logout")
       .send({ refreshToken: userInfo.refreshTokens });
