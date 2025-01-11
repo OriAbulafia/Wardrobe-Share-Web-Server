@@ -10,6 +10,7 @@ import post_routes from "./routes/post_routes";
 import comment_routes from "./routes/comment_routes";
 import swaggerUI from "swagger-ui-express";
 import specs from "./doc/swagger";
+import "./types/types";
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -19,6 +20,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   res.header("Access-Control-Allow-Headers", "*");
   next();
 });
+app.use("/uploads", express.static("uploads"));
 app.use("/user", user_routes);
 app.use("/post", post_routes);
 app.use("/comment", comment_routes);
