@@ -14,9 +14,9 @@ const postsSchema = new Schema({
     type: String,
     required: true,
   },
-  image: {
+  picture: {
     type: String,
-    required: true,
+    default: "",
   },
   likes: [
     {
@@ -25,7 +25,7 @@ const postsSchema = new Schema({
       default: [],
     },
   ],
-  catagoery: {
+  category: {
     type: String,
     required: true,
   },

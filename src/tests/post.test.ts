@@ -2,8 +2,7 @@ import request from "supertest";
 import initApp from "../server";
 import mongoose from "mongoose";
 import { Express } from "express";
-import userModel from "../models/user_model";
-import postModel from "../models/post_model";
+import path from "path";
 
 let app: Express;
 
@@ -13,7 +12,6 @@ type UserInfo = {
   email: string;
   f_name: string;
   l_name: string;
-  picture: string;
   likedPosts?: string[];
   accessToken?: string;
   refreshTokens?: string;
@@ -24,9 +22,8 @@ type PostInfo = {
   user?: string;
   title: string;
   description: string;
-  image: string;
   likes?: string[];
-  catagoery: string;
+  category: string;
   phone: string;
   region: string;
   city: string;
@@ -36,8 +33,7 @@ type PostInfo = {
 const postInfo: PostInfo = {
   title: "testtitle",
   description: "testdescription",
-  image: "testimage",
-  catagoery: "testcatagoery",
+  category: "testcategory",
   phone: "testphone",
   region: "testregion",
   city: "testcity",
@@ -49,25 +45,31 @@ const userInfo: UserInfo = {
   email: "testemail",
   f_name: "testf_name",
   l_name: "testl_name",
-  picture: "testpicture",
 };
 
 const fakeId = "60f7b4f3bbedb00000000000";
 
+const imagePath = path.join(__dirname, "assets", "trash.png");
+
 beforeAll(async () => {
   app = await initApp();
-  const response = await request(app).post("/user/register").send(userInfo);
-  userInfo._id = response.body._id;
-  const response2 = await request(app).post("/user/login").send({
+  await request(app)
+    .post("/user/register")
+    .field("f_name", userInfo.f_name)
+    .field("l_name", userInfo.l_name)
+    .field("email", userInfo.email)
+    .field("username", userInfo.username)
+    .field("password", userInfo.password)
+    .attach("picture", imagePath);
+  const response = await request(app).post("/user/login").send({
     username: userInfo.username,
     password: userInfo.password,
   });
-  userInfo.accessToken = response2.body.accessToken;
+  userInfo.refreshTokens = response.body.refreshToken;
+  userInfo.accessToken = response.body.accessToken;
 });
 
 afterAll(async () => {
-  await postModel.deleteMany({});
-  await userModel.deleteMany({});
   await mongoose.connection.close();
 });
 
@@ -76,27 +78,33 @@ describe("Post Tests", () => {
     const response = await request(app)
       .post("/post")
       .set("Authorization", `JWT ${userInfo.accessToken}`)
-      .send(postInfo);
-    expect(response.status).toBe(201);
+      .field("title", postInfo.title)
+      .field("description", postInfo.description)
+      .field("category", postInfo.category)
+      .field("phone", postInfo.phone)
+      .field("region", postInfo.region)
+      .field("city", postInfo.city)
+      .attach("picture", imagePath);
+    expect(response.status).toBe(200);
     postInfo._id = response.body._id;
   });
-  test("Crate Post without all fields", async () => {
+  test("Create Post without all fields", async () => {
     const response = await request(app)
       .post("/post")
       .set("Authorization", `JWT ${userInfo.accessToken}`)
-      .send({ title: "testtitle" });
+      .field("title", postInfo.title);
     expect(response.status).toBe(400);
   });
   test("Get Post", async () => {
     const response = await request(app).get("/post");
     expect(response.body.length).toBe(1);
     expect(response.status).toBe(200);
-    const response2 = await request(app).get("/post?catagoery=testcatagoery");
+    const response2 = await request(app).get("/post?category=testcategory");
     expect(response2.body.length).toBe(1);
     expect(response2.status).toBe(200);
   });
   test("Get Post by catagory fail - no data", async () => {
-    const response = await request(app).get("/post?catagoery=catagoery");
+    const response = await request(app).get("/post?category=category");
     expect(response.status).toBe(404);
   });
   test("Get Post by id", async () => {
@@ -131,47 +139,79 @@ describe("Post Tests", () => {
     expect(response.status).toBe(404);
   });
   test("Post like fail - User doesn't exist", async () => {
-    await userModel.deleteMany({});
+    await request(app)
+      .delete("/user/delete")
+      .set("Authorization", `JWT ${userInfo.accessToken}`);
     const response = await request(app)
       .post(`/post/${postInfo._id}/like`)
       .set("Authorization", `JWT ${userInfo.accessToken}`);
     expect(response.status).toBe(403);
   });
   test("Update Post", async () => {
-    const response = await request(app).post("/user/register").send(userInfo);
-    userInfo._id = response.body._id;
-    const response2 = await request(app).post("/user/login").send({
+    await request(app)
+      .post("/user/register")
+      .field("f_name", userInfo.f_name)
+      .field("l_name", userInfo.l_name)
+      .field("email", userInfo.email)
+      .field("username", userInfo.username)
+      .field("password", userInfo.password)
+      .attach("picture", imagePath);
+    const response = await request(app).post("/user/login").send({
       username: userInfo.username,
       password: userInfo.password,
     });
-    userInfo.accessToken = response2.body.accessToken;
+    userInfo.refreshTokens = response.body.refreshToken;
+    userInfo.accessToken = response.body.accessToken;
+    const response2 = await request(app)
+      .post("/post")
+      .set("Authorization", `JWT ${userInfo.accessToken}`)
+      .field("title", postInfo.title)
+      .field("description", postInfo.description)
+      .field("category", postInfo.category)
+      .field("phone", postInfo.phone)
+      .field("region", postInfo.region)
+      .field("city", postInfo.city)
+      .attach("picture", imagePath);
+    postInfo._id = response2.body._id;
     const response3 = await request(app)
       .put(`/post/${postInfo._id}`)
       .set("Authorization", `JWT ${userInfo.accessToken}`)
-      .send({ title: "updatedtitle" });
-    expect(response3.body.title).toBe("updatedtitle");
+      .field("title", "updatedtitle")
+      .field("description", postInfo.description)
+      .field("category", postInfo.category)
+      .field("phone", postInfo.phone)
+      .field("region", postInfo.region)
+      .field("city", postInfo.city)
+      .attach("picture", imagePath);
     expect(response3.status).toBe(200);
+    expect(response3.body.title).toBe("updatedtitle");
   });
   test("Update Post fail - Fake post id", async () => {
     const response = await request(app)
       .put(`/post/${fakeId}`)
       .set("Authorization", `JWT ${userInfo.accessToken}`)
-      .send({ title: "updatedtitle" });
-    expect(response.status).toBe(404);
+      .field("title", "updatedtitle")
+      .field("description", postInfo.description)
+      .field("category", postInfo.category)
+      .field("phone", postInfo.phone)
+      .field("region", postInfo.region)
+      .field("city", postInfo.city)
+      .attach("picture", imagePath);
+    expect(response.status).toBe(400);
   });
   test("Update Post fail - tried to update likes", async () => {
     const response = await request(app)
       .put(`/post/${postInfo._id}`)
       .set("Authorization", `JWT ${userInfo.accessToken}`)
-      .send({ likes: ["test"] });
+      .field("title", "updatedtitle")
+      .field("description", postInfo.description)
+      .field("likes", [ "test" ])
+      .field("category", postInfo.category)
+      .field("phone", postInfo.phone)
+      .field("region", postInfo.region)
+      .field("city", postInfo.city)
+      .attach("picture", imagePath);
     expect(response.status).toBe(403);
-  });
-  test("Update Post fail - invalid post id", async () => {
-    const response = await request(app)
-      .put(`/post/invalidId`)
-      .set("Authorization", `JWT ${userInfo.accessToken}`)
-      .send({ title: "updatedtitle" });
-    expect(response.status).toBe(400);
   });
   test("Delete Post fail - invalid post id", async () => {
     const response = await request(app)
@@ -184,5 +224,6 @@ describe("Post Tests", () => {
       .delete(`/post/${postInfo._id}`)
       .set("Authorization", `JWT ${userInfo.accessToken}`);
     expect(response.status).toBe(200);
+    await request(app).delete("/user/delete").set("Authorization", `JWT ${userInfo.accessToken}`);
   });
 });

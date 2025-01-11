@@ -1,22 +1,40 @@
 import { Request, Response } from "express";
 import postModel from "../models/post_model";
 import userModel from "../models/user_model";
+import commentModel from "../models/comment_model";
 import { Types } from "mongoose";
+import { deleteFileFromPath } from "../utils/functions";
 
 const createPost = async (req: Request, res: Response) => {
-  const _id = req.query.userId;
-  const post = {
-    user: _id,
-    ...req.body,
-    likes: [],
-  };
-  req.body = post;
-  try {
-    const data = await postModel.create(req.body);
-    res.status(201).send(data);
-  } catch (err) {
-    res.status(400).send(err);
+  const id = req.query.userId;
+  
+  const title = req.body.title;
+  const description = req.body.description;
+  const category = req.body.category;
+  const phone = req.body.phone;
+  const region = req.body.region;
+  const city = req.body.city;
+  const picture = req.file ? req.file.path : null;
+
+  if(!title || !description || !category || !phone || !region || !city) {
+    res.status(400).send("Missing required fields");
+    await deleteFileFromPath(req.file?.path);
+    return;
   }
+
+  const post = await postModel.create({
+    user: id,
+    title,
+    description,
+    category,
+    phone,
+    region,
+    city,
+    picture,
+    likes: [],
+  });
+
+  res.status(200).send(post);
 };
 
 const getAllPosts = async (req: Request, res: Response) => {
@@ -32,50 +50,76 @@ const getAllPosts = async (req: Request, res: Response) => {
   }
 };
 
-const getPostById = async (req: Request, res: Response) => {
+const getPostById = async (req: Request, res: Response): Promise<void> => {
   const id = req.params.postId;
   try {
     const data = await postModel.findById(id);
     if (data) {
-      return res.send(data);
+      res.send(data);
+      return;
     } else {
-      return res.status(404).send("item not found");
+      res.status(404).send("item not found");
+      return;
     }
   } catch (err) {
-    return res.status(400).send(err);
+    res.status(400).send(err);
+    return;
   }
 };
 
-const updatePost = async (req: Request, res: Response) => {
-  const id = req.params.postId;
-  if (req.body.likes) {
-    return res.status(403).send("Cannot update likes");
+const updatePost = async (req: Request, res: Response): Promise<void> => {
+  const postId = req.params.postId;
+  const title = req.body.title;
+  const description = req.body.description;
+  const category = req.body.category;
+  const phone = req.body.phone;
+  const region = req.body.region;
+  const city = req.body.city;
+  const likes = req.body.likes;
+  if (likes) {
+    res.status(403).send("Cannot update likes");
+    await deleteFileFromPath(req.file?.path);
+    return;
   }
-  try {
-    const data = await postModel.findByIdAndUpdate(id, req.body, {
-      new: true,
-    });
-    if (data) {
-      return res.send(data);
-    } else {
-      return res.status(404).send("item not found");
-    }
-  } catch (err) {
-    return res.status(400).send(err);
+  const post = await postModel.findOne({ _id: postId });
+  if (!post) {
+    res.status(400).send("post not found");
+    await deleteFileFromPath(req.file?.path);
+    return;
   }
+  let picture: string | undefined | null = post.picture;
+  if (req.file) {
+    await deleteFileFromPath(post.picture);
+    picture = req.file.path;
+    post.picture = picture;
+  }
+  post.title = title;
+  post.description = description;
+  post.category = category;
+  post.phone = phone;
+  post.region = region;
+  post.city = city;
+  await post.save();
+
+  res.status(200).send(post);
 };
 
-const deletePost = async (req: Request, res: Response) => {
+const deletePost = async (req: Request, res: Response): Promise<void> => {
   const id = req.params.postId;
   try {
+    const data = await postModel.findById(id);
+    await deleteFileFromPath(data?.picture);
+    await commentModel.deleteMany({ post: id });
     await postModel.findByIdAndDelete(id);
-    return res.send("item deleted");
+    res.send("item deleted");
+    return;
   } catch (err) {
-    return res.status(400).send(err);
+    res.status(400).send(err);
+    return;
   }
 };
 
-const likePost = async (req: Request, res: Response) => {
+const likePost = async (req: Request, res: Response): Promise<void> => {
   const { postId } = req.params;
   const userId = req.query.userId as string;
   let flag = false;
@@ -84,11 +128,13 @@ const likePost = async (req: Request, res: Response) => {
   const user = await userModel.findById(userId);
 
   if (!user) {
-    return res.status(403).send("User not found");
+    res.status(403).send("User not found");
+    return;
   }
 
   if (!post) {
-    return res.status(404).send("Post not found");
+    res.status(404).send("Post not found");
+    return;
   }
 
   const u_id = new Types.ObjectId(userId);
@@ -109,9 +155,11 @@ const likePost = async (req: Request, res: Response) => {
   await user.save();
 
   if (flag) {
-    return res.send("Post unliked");
+    res.send("Post unliked");
+    return;
   } else {
-    return res.send("Post liked");
+    res.send("Post liked");
+    return;
   }
 };
 

@@ -1,10 +1,13 @@
 import express, { Request, Response } from "express";
 import userController from "../controllers/user_controller";
 import { authUser } from "../middleware/auth_middleware";
+import upload from "../config/storage";
 
 const router = express.Router();
 
-router.post("/register", userController.register);
+router.post("/register", upload.single('picture') ,userController.register);
+
+router.post("/googleLogin", userController.googleLogin);
 
 router.post("/login", userController.login);
 
@@ -14,16 +17,10 @@ router.post("/refresh", userController.refresh);
 
 router.get("/:userId", userController.getUser);
 
-router.get("/auth/settings", authUser, (req: Request, res: Response) => {
-  userController.getSettings(req, res);
-});
+router.get("/auth/settings", authUser, userController.getSettings);
 
-router.put("/update", authUser, (req: Request, res: Response) => {
-  userController.updateUser(req, res);
-});
+router.put("/update", authUser, upload.single('picture'), userController.updateUser)
 
-router.delete("/delete", authUser, (req: Request, res: Response) => {
-  userController.deleteUser(req, res);
-});
+router.delete("/delete", authUser, userController.deleteUser);
 
 export default router;

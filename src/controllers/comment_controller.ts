@@ -16,66 +16,79 @@ const createComment = async (req: Request, res: Response) => {
   }
 };
 
-const getAllCommentsByPost = async (req: Request, res: Response) => {
+const getAllCommentsByPost = async (req: Request, res: Response): Promise<void> => {
   const id = req.params.postId;
   try {
     const data = await commentModel.find({ post: id });
     if (data.length > 0) {
-      return res.status(200).send(data);
+      res.status(200).send(data);
+      return;
     } else {
-      return res.status(404).send("item not found");
+      res.status(404).send("item not found");
+      return;
     }
   } catch (err) {
-    return res.status(400).send(err);
+    res.status(400).send(err);
+    return;
   }
 };
 
-const getCommentById = async (req: Request, res: Response) => {
+const getCommentById = async (req: Request, res: Response): Promise<void> => {
   const id = req.params.commentId;
   try {
     const data = await commentModel.findById(id);
     if (data) {
-      return res.status(200).send(data);
+      res.status(200).send(data);
+      return;
     } else {
-      return res.status(404).send("item not found");
+      res.status(404).send("item not found");
+      return;
     }
   } catch (err) {
-    return res.status(400).send(err);
+    res.status(400).send(err);
+    return;
   }
 };
 
-const updateComment = async (req: Request, res: Response) => {
+const updateComment = async (req: Request, res: Response): Promise<void> => {
   const id = req.params.commentId;
   const post = req.body.post;
   const user = req.body.user;
   if (post || user) {
-    return res.status(403).send("Cannot update postId or userId");
+    res.status(403).send("Cannot update postId or userId");
+    return;
   }
   try {
     const data = await commentModel.findByIdAndUpdate(id, req.body, {
       new: true,
     });
     if (data) {
-      return res.status(200).send(data);
+      res.status(200).send(data);
+      return;
     } else {
-      return res.status(404).send("item not found");
+      res.status(404).send("item not found");
+      return;
     }
   } catch (err) {
-    return res.status(400).send(err);
+    res.status(400).send(err);
+    return;
   }
 };
 
-const deleteComment = async (req: Request, res: Response) => {
+const deleteComment = async (req: Request, res: Response): Promise<void> => {
   const id = req.params.commentId;
   try {
     const data = await commentModel.findByIdAndDelete(id);
     if (data) {
-      return res.status(200).send("item deleted");
+      res.status(200).send("item deleted");
+      return;
     } else {
-      return res.status(404).send("item not found");
+      res.status(404).send("item not found");
+      return;
     }
   } catch (err) {
-    return res.status(400).send(err);
+    res.status(400).send(err);
+    return;
   }
 };
 
