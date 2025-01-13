@@ -316,9 +316,11 @@ const getSettings = async (req: Request, res: Response) => {
   }
   res.status(200).send({
     username: user.username,
+    email: user.email,
     f_name: user.f_name,
     l_name: user.l_name,
     picture: user.picture,
+    likedPosts: user.likedPosts,
   });
 };
 
