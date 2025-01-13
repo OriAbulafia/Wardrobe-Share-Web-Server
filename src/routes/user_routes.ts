@@ -5,7 +5,7 @@ import upload from "../config/storage";
 
 const router = express.Router();
 
-router.post("/register", upload.single('picture') ,userController.register);
+router.post("/register", upload.single("picture"), userController.register);
 
 router.post("/googleLogin", userController.googleLogin);
 
@@ -19,7 +19,12 @@ router.get("/:userId", userController.getUser);
 
 router.get("/auth/settings", authUser, userController.getSettings);
 
-router.put("/update", authUser, upload.single('picture'), userController.updateUser)
+router.put(
+  "/update",
+  authUser,
+  upload.single("picture"),
+  userController.updateUser
+);
 
 router.delete("/delete", authUser, userController.deleteUser);
 

@@ -9,11 +9,16 @@ router.get("/", postController.getAllPosts);
 
 router.get("/:postId", postController.getPostById);
 
-router.post("/", authUser, upload.single('picture') , postController.createPost);
+router.post("/", authUser, upload.single("picture"), postController.createPost);
 
 router.post("/:postId/like", authUser, postController.likePost);
 
-router.put("/:postId", authUser, upload.single('picture') ,postController.updatePost);
+router.put(
+  "/:postId",
+  authUser,
+  upload.single("picture"),
+  postController.updatePost
+);
 
 router.delete("/:postId", authUser, postController.deletePost);
 

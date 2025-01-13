@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
 type TokenPayload = {
-    _id: string;
+  _id: string;
 };
 
 const authUser = (req: Request, res: Response, next: NextFunction) => {

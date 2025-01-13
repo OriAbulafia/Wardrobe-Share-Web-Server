@@ -7,7 +7,7 @@ import { deleteFileFromPath } from "../utils/functions";
 
 const createPost = async (req: Request, res: Response) => {
   const id = req.query.userId;
-  
+
   const title = req.body.title;
   const description = req.body.description;
   const category = req.body.category;
@@ -16,7 +16,7 @@ const createPost = async (req: Request, res: Response) => {
   const city = req.body.city;
   const picture = req.file ? req.file.path : null;
 
-  if(!title || !description || !category || !phone || !region || !city) {
+  if (!title || !description || !category || !phone || !region || !city) {
     res.status(400).send("Missing required fields");
     await deleteFileFromPath(req.file?.path);
     return;
