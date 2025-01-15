@@ -11,15 +11,24 @@ import comment_routes from "./routes/comment_routes";
 import swaggerUI from "swagger-ui-express";
 import specs from "./doc/swagger";
 import "./types/types";
+import cors from "cors";
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use((req: Request, res: Response, next: NextFunction) => {
+
+// Configure CORS to allow the frontend to communicate with the backend
+app.use(cors({
+  origin: "http://localhost:5173", // Replace with your frontend's origin
+  credentials: true, // Allow cookies to be sent
+}));
+
+app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "*");
   res.header("Access-Control-Allow-Headers", "*");
+  res.header("Access-Control-Allow-Methods", "*");
   next();
 });
+
 app.use("/uploads", express.static("uploads"));
 app.use("/user", user_routes);
 app.use("/post", post_routes);
@@ -29,6 +38,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   res.status(err.status || 500).send(err.message || "Internal Server Error");
 });
 
+// Swagger docs
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
 
 const initApp = (): Promise<Express> => {
