@@ -378,13 +378,12 @@ const deleteUser = async (req: Request, res: Response) => {
     }
   }
 
-  while (await postModel.findOne({ user: userId })) {
-    const post = await postModel.findOne({ user: userId });
-    if (post) {
-      await deleteFileFromPath(post.picture);
-      await postModel.deleteOne({ _id: post._id });
-    }
+  const posts = await postModel.find({ user: userId });
+  for (let i = 0; i < posts.length; i++) {
+    await deleteFileFromPath(posts[i].picture);
+    await commentModel.deleteMany({ post: posts[i]._id });
   }
+  await postModel.deleteMany({ user: userId });
 
   await deleteFileFromPath(user.picture);
   await commentModel.deleteMany({ user: userId });
