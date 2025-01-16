@@ -32,6 +32,7 @@ const createPost = async (req: Request, res: Response) => {
     city,
     picture,
     likes: [],
+    comments: [],
   });
 
   res.status(200).send(post);
@@ -76,8 +77,9 @@ const updatePost = async (req: Request, res: Response): Promise<void> => {
   const region = req.body.region;
   const city = req.body.city;
   const likes = req.body.likes;
-  if (likes) {
-    res.status(403).send("Cannot update likes");
+  const comments = req.body.comments;
+  if (likes || comments) {
+    res.status(403).send("Cannot update likes or comments");
     await deleteFileFromPath(req.file?.path);
     return;
   }

@@ -25,6 +25,13 @@ const postsSchema = new Schema({
       default: [],
     },
   ],
+  comments: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Comment",
+      default: [],
+    },
+  ],
   category: {
     type: String,
     required: true,
