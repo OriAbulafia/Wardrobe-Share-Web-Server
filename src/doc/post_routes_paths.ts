@@ -1,3 +1,5 @@
+import Comments from "../models/comment_model";
+
 const postPaths = {
   "/post": {
     post: {
@@ -12,14 +14,14 @@ const postPaths = {
       requestBody: {
         required: true,
         content: {
-          "application/json": {
+          "multipart/form-data": {
             schema: {
               type: "object",
               required: [
                 "title",
                 "description",
-                "image",
-                "catagoery",
+                "picture",
+                "category",
                 "phone",
                 "region",
                 "city",
@@ -33,13 +35,13 @@ const postPaths = {
                   type: "string",
                   example: "testdescription",
                 },
-                image: {
-                  type: "string",
-                  example: "testimage",
+                picture: {
+                  type: "file",
+                  example: "testpicture",
                 },
-                catagoery: {
+                category: {
                   type: "string",
-                  example: "testcatagoery",
+                  example: "testcategory",
                 },
                 phone: {
                   type: "string",
@@ -66,6 +68,10 @@ const postPaths = {
               schema: {
                 type: "object",
                 properties: {
+                  user: {
+                    type: "string",
+                    example: "60f7b4f3bbedb00000000000",
+                  },
                   title: {
                     type: "string",
                     example: "testtitle",
@@ -74,7 +80,7 @@ const postPaths = {
                     type: "string",
                     example: "testdescription",
                   },
-                  image: {
+                  picture: {
                     type: "string",
                     example: "testimage",
                   },
@@ -85,7 +91,14 @@ const postPaths = {
                     },
                     example: [],
                   },
-                  catagoery: {
+                  comments: {
+                    type: "array",
+                    items: {
+                      type: "string",
+                    },
+                    example: [],
+                  },
+                  category: {
                     type: "string",
                     example: "testcatagoery",
                   },
@@ -142,6 +155,10 @@ const postPaths = {
                 items: {
                   type: "object",
                   properties: {
+                    _id: {
+                      type: "string",
+                      example: "60f7b4f3bbedb00000000000",
+                    },
                     user: {
                       type: "string",
                       example: "60f7b4f3bbedb00000000000",
@@ -154,7 +171,7 @@ const postPaths = {
                       type: "string",
                       example: "testdescription",
                     },
-                    image: {
+                    picture: {
                       type: "string",
                       example: "testimage",
                     },
@@ -165,9 +182,16 @@ const postPaths = {
                       },
                       example: [],
                     },
-                    catagoery: {
+                    comments: {
+                      type: "array",
+                      items: {
+                        type: "string",
+                      },
+                      example: [],
+                    },
+                    category: {
                       type: "string",
-                      example: "testcatagoery",
+                      example: "testcategory",
                     },
                     phone: {
                       type: "string",
@@ -180,10 +204,6 @@ const postPaths = {
                     city: {
                       type: "string",
                       example: "testcity",
-                    },
-                    _id: {
-                      type: "string",
-                      example: "60f7b4f3bbedb00000000000",
                     },
                   },
                 },
@@ -234,6 +254,14 @@ const postPaths = {
               schema: {
                 type: "object",
                 properties: {
+                  _id: {
+                    type: "string",
+                    example: "60f7b4f3bbedb00000000000",
+                  },
+                  user: {
+                    type: "string",
+                    example: "60f7b4f3bbedb00000000000",
+                  },
                   title: {
                     type: "string",
                     example: "testtitle",
@@ -242,7 +270,7 @@ const postPaths = {
                     type: "string",
                     example: "testdescription",
                   },
-                  image: {
+                  picture: {
                     type: "string",
                     example: "testimage",
                   },
@@ -253,9 +281,16 @@ const postPaths = {
                     },
                     example: [],
                   },
-                  catagoery: {
+                  comments: {
+                    type: "array",
+                    items: {
+                      type: "string",
+                    },
+                    example: [],
+                  },
+                  category: {
                     type: "string",
-                    example: "testcatagoery",
+                    example: "testcategory",
                   },
                   phone: {
                     type: "string",
@@ -268,10 +303,6 @@ const postPaths = {
                   city: {
                     type: "string",
                     example: "testcity",
-                  },
-                  _id: {
-                    type: "string",
-                    example: "60f7b4f3bbedb00000000000",
                   },
                 },
               },
@@ -336,44 +367,37 @@ const postPaths = {
       requestBody: {
         required: true,
         content: {
-          "application/json": {
+          "multipart/form-data": {
             schema: {
               type: "object",
               properties: {
                 title: {
                   type: "string",
-                  description: "The post's title.",
-                  example: "The updated title.",
+                  description: "The updated title.",
                 },
                 description: {
                   type: "string",
-                  description: "The post's description.",
-                  example: "The updated description.",
+                  description: "The updated description.",
                 },
-                image: {
-                  type: "string",
-                  description: "The post's image.",
-                  example: "The updated image.",
+                picture: {
+                  type: "file",
+                  description: "The updated image.",
                 },
-                catagoery: {
+                category: {
                   type: "string",
-                  description: "The post's catagoery.",
-                  example: "The updated catagoery.",
+                  description: "The updated category.",
                 },
                 phone: {
                   type: "string",
-                  description: "The post's phone.",
-                  example: "The updated phone.",
+                  description: "The updated phone.",
                 },
                 region: {
                   type: "string",
-                  description: "The post's region.",
-                  example: "The updated region.",
+                  description: "The updated region.",
                 },
                 city: {
                   type: "string",
-                  description: "The post's city.",
-                  example: "The updated city.",
+                  description: "The updated city.",
                 },
               },
             },
@@ -404,7 +428,7 @@ const postPaths = {
                     type: "string",
                     example: "The updated description.",
                   },
-                  image: {
+                  picture: {
                     type: "string",
                     example: "The updated image.",
                   },
@@ -415,9 +439,16 @@ const postPaths = {
                     },
                     example: [],
                   },
-                  catagoery: {
+                  comments: {
+                    type: "array",
+                    items: {
+                      type: "string",
+                    },
+                    example: [],
+                  },
+                  category: {
                     type: "string",
-                    example: "The updated catagoery.",
+                    example: "The updated category.",
                   },
                   phone: {
                     type: "string",

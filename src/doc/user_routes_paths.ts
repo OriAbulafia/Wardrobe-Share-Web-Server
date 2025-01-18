@@ -8,25 +8,18 @@ const userPaths = {
       requestBody: {
         required: true,
         content: {
-          "application/json": {
+          "multipart/form-data": {
             schema: {
               type: "object",
-              required: [
-                "username",
-                "password",
-                "email",
-                "f_name",
-                "l_name",
-                "picture",
-              ],
               properties: {
-                username: { type: "string", example: "Sahar" },
-                password: { type: "string", example: "password" },
-                email: { type: "string", example: "email" },
-                f_name: { type: "string", example: "Sahar" },
-                l_name: { type: "string", example: "Sahar" },
-                picture: { type: "string", example: "Sahar" },
+                username: { type: "string", example: "example" },
+                password: { type: "string", example: "example" },
+                email: { type: "string", example: "example" },
+                f_name: { type: "string", example: "example" },
+                l_name: { type: "string", example: "example" },
+                picture: { type: "file", example: "null" },
               },
+              required: ["username", "password", "email", "f_name", "l_name"],
             },
           },
         },
@@ -37,17 +30,32 @@ const userPaths = {
           content: {
             "application/json": {
               schema: {
-                type: "object",
-                properties: {
-                  username: { type: "string", example: "Sahar" },
-                  password: { type: "string", example: "HashedPassword#@$#$" },
-                  email: { type: "string", example: "email" },
-                  f_name: { type: "string", example: "Sahar" },
-                  l_name: { type: "string", example: "Sahar" },
-                  picture: { type: "string", example: "Sahar" },
-                  likedPosts: { type: "array", example: [] },
-                  refreshTokens: { type: "array", example: [] },
-                  _id: { type: "string", example: "676aa39695b4233508df4147" },
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    user: {
+                      properties: {
+                        username: { type: "string", example: "example" },
+                        password: { type: "string", example: "HashedPassword" },
+                        email: { type: "string", example: "example" },
+                        f_name: { type: "string", example: "example" },
+                        l_name: { type: "string", example: "example" },
+                        picture: { type: "string", example: null },
+                        likedPosts: { type: "array", example: [] },
+                        refreshTokens: {
+                          type: "array",
+                          example: ["refreshToken"],
+                        },
+                        _id: {
+                          type: "string",
+                          example: "676aa39695b4233508df4147",
+                        },
+                      },
+                    },
+                    refreshToken: { type: "array", example: "refreshToken" },
+                    accessToken: { type: "string", example: "accessToken" },
+                  },
                 },
               },
             },
@@ -89,6 +97,107 @@ const userPaths = {
       },
     },
   },
+  "/user/googleLogin": {
+    post: {
+      summary: "Login a user with Google",
+      description:
+        "Endpoint to login a user with Google. Returns a user and an access token and a refresh token.",
+      tags: ["Users"],
+      requestBody: {
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                code: {
+                  type: "string",
+                  description: "Google token ID",
+                },
+              },
+              required: ["code"],
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: "User registration succeeded.",
+          content: {
+            "application/json": {
+              schema: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    user: {
+                      properties: {
+                        username: {
+                          type: "string",
+                          example: "unique-username",
+                        },
+                        password: {
+                          type: "string",
+                          example: "unique-password",
+                        },
+                        email: { type: "string", example: "google-email" },
+                        f_name: { type: "string", example: "google-f_name" },
+                        l_name: { type: "string", example: "google-l_name" },
+                        picture: { type: "string", example: "google-picture" },
+                        likedPosts: { type: "array", example: [] },
+                        refreshTokens: {
+                          type: "array",
+                          example: ["refreshToken"],
+                        },
+                        _id: {
+                          type: "string",
+                          example: "676aa39695b4233508df4147",
+                        },
+                      },
+                    },
+                    refreshToken: { type: "array", example: "refreshToken" },
+                    accessToken: { type: "string", example: "accessToken" },
+                  },
+                },
+              },
+            },
+          },
+        },
+        400: {
+          description: "No google token.",
+          content: {
+            "application/json": {
+              schema: {
+                type: "string",
+                example: "Invalid code",
+              },
+            },
+          },
+        },
+        401: {
+          description: "Invalid google token.",
+          content: {
+            "application/json": {
+              schema: {
+                type: "string",
+                example: "Invalid code",
+              },
+            },
+          },
+        },
+        402: {
+          description: "Invalid email.",
+          content: {
+            "application/json": {
+              schema: {
+                type: "string",
+                example: "Invalid email",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
   "/user/login": {
     post: {
       summary: "Login a user",
@@ -103,8 +212,8 @@ const userPaths = {
               type: "object",
               required: ["username", "password"],
               properties: {
-                username: { type: "string", example: "Sahar" },
-                password: { type: "string", example: "password" },
+                username: { type: "string", example: "example" },
+                password: { type: "string", example: "example" },
               },
             },
           },
@@ -118,7 +227,7 @@ const userPaths = {
               schema: {
                 type: "object",
                 properties: {
-                  username: { type: "string", example: "Sahar" },
+                  username: { type: "string", example: "example" },
                   _id: { type: "string", example: "676aa39695b4233508df4147" },
                   accessToken: { type: "string", example: "accessToken" },
                   refreshToken: { type: "string", example: "refreshToken" },
@@ -179,7 +288,7 @@ const userPaths = {
                 refreshToken: {
                   type: "string",
                   description: "The refresh token to revoke.",
-                  example: "eyJhbGci...",
+                  example: "refreshToken",
                 },
               },
             },
@@ -261,7 +370,7 @@ const userPaths = {
                 refreshToken: {
                   type: "string",
                   description: "The refresh token to use.",
-                  example: "eyJhbGci...",
+                  example: "refreshToken",
                 },
               },
             },
@@ -279,12 +388,12 @@ const userPaths = {
                   accessToken: {
                     type: "string",
                     description: "The new access token.",
-                    example: "eyJhbGci...",
+                    example: "accessToken",
                   },
                   refreshToken: {
                     type: "string",
                     description: "The new refresh token.",
-                    example: "eyJhbGci...",
+                    example: "refreshToken",
                   },
                 },
               },
@@ -413,10 +522,12 @@ const userPaths = {
               schema: {
                 type: "object",
                 properties: {
-                  username: { type: "string", example: "Sahar" },
-                  f_name: { type: "string", example: "Sahar" },
-                  l_name: { type: "string", example: "Sahar" },
-                  picture: { type: "string", example: "Sahar" },
+                  username: { type: "string", example: "example" },
+                  email: { type: "string", example: "example" },
+                  f_name: { type: "string", example: "example" },
+                  l_name: { type: "string", example: "example" },
+                  picture: { type: "string", example: "example" },
+                  likedposts: { type: "array", example: [] },
                 },
               },
             },
@@ -449,14 +560,26 @@ const userPaths = {
       requestBody: {
         required: true,
         content: {
-          "application/json": {
+          "multipart/form-data": {
             schema: {
               type: "object",
               properties: {
-                username: { type: "string", example: "updated username" },
-                f_name: { type: "string", example: "updated first name" },
-                l_name: { type: "string", example: "updated last name" },
-                picture: { type: "string", example: "updated picture" },
+                username: {
+                  type: "string",
+                  description: "Username of the user",
+                },
+                f_name: {
+                  type: "string",
+                  description: "First name of the user",
+                },
+                l_name: {
+                  type: "string",
+                  description: "Last name of the user",
+                },
+                picture: {
+                  type: "file",
+                  description: "Profile picture of the user",
+                },
               },
             },
           },
