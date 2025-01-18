@@ -172,12 +172,12 @@ const login = async (req: Request, res: Response) => {
   }
   const user = await userModel.findOne({ username: username });
   if (!user) {
-    res.status(400).send("user does not exist");
+    res.status(400).send("username or password is incorrect");
     return;
   }
   const validPassword = await bcrypt.compare(password, user.password);
   if (!validPassword) {
-    res.status(401).send("password is incorrect");
+    res.status(401).send("username or password is incorrect");
     return;
   }
 
