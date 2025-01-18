@@ -84,13 +84,13 @@ const googleLogin = async (req: Request, res: Response): Promise<void> => {
 
     const payload = ticket.getPayload();
     if (!payload) {
-      res.status(400).send("Invalid payload");
+      res.status(401).send("Invalid payload");
       return;
     }
 
     const email = payload.email;
     if (!email) {
-      res.status(400).send("Invalid email");
+      res.status(402).send("Invalid email");
       return;
     }
     const user = await userModel.findOne({
