@@ -48,6 +48,10 @@ const postsSchema = new Schema({
     type: String,
     required: true,
   },
+  createdAt: 
+  { type: Date, 
+    default: Date.now 
+  },
 });
 
 const Posts = mongoose.model("Posts", postsSchema);

@@ -39,17 +39,39 @@ const createPost = async (req: Request, res: Response) => {
 };
 
 const getAllPosts = async (req: Request, res: Response) => {
-  const filter = req.query;
-  const data =
-    Object.keys(filter).length === 0
-      ? await postModel.find()
-      : await postModel.find(filter);
-  if (Object.keys(data).length === 0) {
-    res.status(404).send("No data found");
-  } else {
-    res.send(data);
+  try {
+    const { page = 1, limit = 20, ...filters } = req.query;
+
+    const pageNumber = parseInt(page as string, 10);
+    const limitNumber = parseInt(limit as string, 10);
+
+    const skip = (pageNumber - 1) * limitNumber;
+
+    const data = await postModel
+      .find(filters)
+      .skip(skip)
+      .limit(limitNumber);
+
+    const total = await postModel.countDocuments(filters);
+
+    if (data.length === 0) {
+      res.status(404).send("No data found");
+      return;
+    }
+    res.status(200).send({
+      total,
+      page: pageNumber,
+      limit: limitNumber,
+      totalPages: Math.ceil(total / limitNumber),
+      data,
+    });
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    res.status(500).send("Server error");
+    
   }
 };
+
 
 const getPostById = async (req: Request, res: Response): Promise<void> => {
   const id = req.params.postId;
@@ -65,6 +87,27 @@ const getPostById = async (req: Request, res: Response): Promise<void> => {
   } catch (err) {
     res.status(400).send(err);
     return;
+  }
+};
+
+const getFeedPosts = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const categories = await postModel.distinct("category");
+
+    const postsByCategory: any = {};
+
+    for (const category of categories) {
+      const posts = await postModel.find({ category })
+        .limit(4)
+        .sort({ createdAt: -1 }); 
+
+      postsByCategory [category] = posts;
+    }
+    
+    res.status(200).send(postsByCategory);
+  } catch (err) {
+    console.error("Error fetching posts by category:", err);
+    res.status(500).send("Server Error");
   }
 };
 
@@ -172,4 +215,5 @@ export default {
   updatePost,
   deletePost,
   likePost,
+  getFeedPosts,
 };
