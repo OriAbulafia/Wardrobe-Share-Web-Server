@@ -239,54 +239,70 @@ const logout = async (req: Request, res: Response, next: Function) => {
   }
 };
 
-const refresh = async (req: Request, res: Response, next: Function) => {
+const refresh = async (req: Request, res: Response) => {
   const refreshToken = req.body.refreshToken;
   if (!refreshToken) {
-    res.status(402).send("invalid token");
+    res.status(402).send("Invalid token");
     return;
   }
 
-  if (process.env.TOKEN_SECRET) {
-    jwt.verify(
-      refreshToken,
-      process.env.TOKEN_SECRET,
-      async (err: any, data: any) => {
-        if (err) {
-          res.status(403).send("invalid token");
-          return;
-        }
+  if (!process.env.TOKEN_SECRET) {
+    res.status(500).send("Server error");
+    return;
+  }
 
-        const payload = data as TokenPayload;
-        const user = await userModel.findOne({ _id: payload._id });
-        if (!user) {
-          res.status(400).send("invalid token");
-          return;
-        }
+  jwt.verify(
+    refreshToken,
+    process.env.TOKEN_SECRET,
+    async (err: any, data: any) => {
+      if (err) {
+        res.status(403).send("Invalid token");
+        return;
+      }
 
-        if (!user.refreshTokens || !user.refreshTokens.includes(refreshToken)) {
-          user.refreshTokens = [];
-          await user.save();
-          res.status(401).send("invalid token");
-          return;
-        }
+      const payload = data as TokenPayload;
+      const user = await userModel.findOne({ _id: payload._id });
+      if (!user) {
+        res.status(400).send("Invalid token");
+        return;
+      }
 
-        const newTokens = generateTokens(user._id.toString());
+      if (!user.refreshTokens || !user.refreshTokens.includes(refreshToken)) {
+        await userModel.updateOne({ _id: payload._id }, { refreshTokens: [] });
+        res.status(401).send("Invalid token");
+        return;
+      }
+
+      const newTokens = generateTokens(user._id.toString());
+
+      try {
         if (newTokens) {
-          user.refreshTokens = user.refreshTokens.filter(
-            (token) => token !== refreshToken
+          await userModel.updateOne(
+            { _id: payload._id },
+            { $pull: { refreshTokens: refreshToken } }
           );
-
-          user.refreshTokens.push(newTokens.refreshToken);
-          await user.save();
-
+          await userModel.updateOne(
+            { _id: payload._id },
+            {
+              $push: {
+                refreshTokens: {
+                  $each: [newTokens.refreshToken],
+                  $slice: -5,
+                },
+              },
+            }
+          );
           res.status(200).send({
             accessToken: newTokens.accessToken,
             refreshToken: newTokens.refreshToken,
           });
         }
+      } catch (error) {
+        console.error("Error updating tokens:", error);
+        res.status(500).send("Server error");
       }
-    );
-  }
+    }
+  );
 };
 
 const getUser = async (req: Request, res: Response) => {
