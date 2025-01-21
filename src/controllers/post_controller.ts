@@ -39,46 +39,36 @@ const createPost = async (req: Request, res: Response) => {
 };
 
 const getAllPosts = async (req: Request, res: Response) => {
-  try {
-    const { page = 1, limit = 20, ...filters } = req.query;
+  const { page = 1, limit = 20, ...filters } = req.query;
 
-    const pageNumber = parseInt(page as string, 10);
-    const limitNumber = parseInt(limit as string, 10);
+  const pageNumber = parseInt(page as string, 10);
+  const limitNumber = parseInt(limit as string, 10);
 
-    const skip = (pageNumber - 1) * limitNumber;
+  const skip = (pageNumber - 1) * limitNumber;
 
-    const data = await postModel
-      .find(filters)
-      .skip(skip)
-      .limit(limitNumber);
+  const data = await postModel.find(filters).skip(skip).limit(limitNumber);
 
-    const total = await postModel.countDocuments(filters);
+  const total = await postModel.countDocuments(filters);
 
-    if (data.length === 0) {
-      res.status(404).send("No data found");
-      return;
-    }
-    res.status(200).send({
-      total,
-      page: pageNumber,
-      limit: limitNumber,
-      totalPages: Math.ceil(total / limitNumber),
-      data,
-    });
-  } catch (error) {
-    console.error("Error fetching posts:", error);
-    res.status(500).send("Server error");
-    
+  if (data.length === 0) {
+    res.status(404).send("No data found");
+    return;
   }
+  res.status(200).send({
+    total,
+    page: pageNumber,
+    limit: limitNumber,
+    totalPages: Math.ceil(total / limitNumber),
+    data,
+  });
 };
-
 
 const getPostById = async (req: Request, res: Response): Promise<void> => {
   const id = req.params.postId;
   try {
     const data = await postModel.findById(id);
     if (data) {
-      res.send(data);
+      res.status(200).send(data);
       return;
     } else {
       res.status(404).send("item not found");
@@ -91,24 +81,20 @@ const getPostById = async (req: Request, res: Response): Promise<void> => {
 };
 
 const getFeedPosts = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const categories = await postModel.distinct("category");
+  const categories = await postModel.distinct("category");
 
-    const postsByCategory: any = {};
+  const postsByCategory: any = {};
 
-    for (const category of categories) {
-      const posts = await postModel.find({ category })
-        .limit(4)
-        .sort({ createdAt: -1 }); 
+  for (const category of categories) {
+    const posts = await postModel
+      .find({ category })
+      .limit(4)
+      .sort({ createdAt: -1 });
 
-      postsByCategory [category] = posts;
-    }
-    
-    res.status(200).send(postsByCategory);
-  } catch (err) {
-    console.error("Error fetching posts by category:", err);
-    res.status(500).send("Server Error");
+    postsByCategory[category] = posts;
   }
+
+  res.status(200).send(postsByCategory);
 };
 
 const updatePost = async (req: Request, res: Response): Promise<void> => {

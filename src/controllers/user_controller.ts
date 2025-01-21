@@ -246,36 +246,34 @@ const refresh = async (req: Request, res: Response) => {
     return;
   }
 
-  if (!process.env.TOKEN_SECRET) {
-    res.status(500).send("Server error");
-    return;
-  }
+  if (process.env.TOKEN_SECRET) {
+    jwt.verify(
+      refreshToken,
+      process.env.TOKEN_SECRET,
+      async (err: any, data: any) => {
+        if (err) {
+          res.status(403).send("Invalid token");
+          return;
+        }
 
-  jwt.verify(
-    refreshToken,
-    process.env.TOKEN_SECRET,
-    async (err: any, data: any) => {
-      if (err) {
-        res.status(403).send("Invalid token");
-        return;
-      }
+        const payload = data as TokenPayload;
+        const user = await userModel.findOne({ _id: payload._id });
+        if (!user) {
+          res.status(400).send("Invalid token");
+          return;
+        }
 
-      const payload = data as TokenPayload;
-      const user = await userModel.findOne({ _id: payload._id });
-      if (!user) {
-        res.status(400).send("Invalid token");
-        return;
-      }
+        if (!user.refreshTokens || !user.refreshTokens.includes(refreshToken)) {
+          await userModel.updateOne(
+            { _id: payload._id },
+            { refreshTokens: [] }
+          );
+          res.status(401).send("Invalid token");
+          return;
+        }
 
-      if (!user.refreshTokens || !user.refreshTokens.includes(refreshToken)) {
-        await userModel.updateOne({ _id: payload._id }, { refreshTokens: [] });
-        res.status(401).send("Invalid token");
-        return;
-      }
+        const newTokens = generateTokens(user._id.toString());
 
-      const newTokens = generateTokens(user._id.toString());
-
-      try {
         if (newTokens) {
           await userModel.updateOne(
             { _id: payload._id },
@@ -297,12 +295,9 @@ const refresh = async (req: Request, res: Response) => {
             refreshToken: newTokens.refreshToken,
           });
         }
-      } catch (error) {
-        console.error("Error updating tokens:", error);
-        res.status(500).send("Server error");
       }
-    }
-  );
+    );
+  }
 };
 
 const getUser = async (req: Request, res: Response) => {

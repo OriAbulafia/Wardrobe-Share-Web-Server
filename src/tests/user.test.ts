@@ -112,6 +112,10 @@ describe("Users Tests", () => {
       .attach("picture", imagePath);
     expect(res.status).toBe(402);
   });
+  test("Google login fail - should return 400 if missing fields", async () => {
+    const response = await request(app).post("/user/googleLogin").send({});
+    expect(response.status).toBe(400);
+  });
   test("login success - should return 200 if user is logged in", async () => {
     const response = await request(app).post("/user/login").send({
       username: userInfo.username,
@@ -166,7 +170,8 @@ describe("Users Tests", () => {
     expect(response2.status).toBe(401);
   });
   test("logout fail - should return 400 if the token is of deleted user", async () => {
-    await request(app).delete("/user/delete")
+    await request(app)
+      .delete("/user/delete")
       .set("Authorization", "JWT " + userInfo.accessToken);
     const response2 = await request(app)
       .post("/user/logout")
@@ -212,7 +217,9 @@ describe("Users Tests", () => {
       .post("/user/refresh")
       .send({ refreshToken: userInfo.refreshTokens });
     expect(response2.status).toBe(401);
-    await request(app).delete("/user/delete").set("Authorization", "JWT " + userInfo.accessToken);
+    await request(app)
+      .delete("/user/delete")
+      .set("Authorization", "JWT " + userInfo.accessToken);
   });
   test("refresh fail - should return 400 if user is deleted", async () => {
     const response2 = await request(app)
@@ -252,7 +259,9 @@ describe("Users Tests", () => {
       .get("/user/auth/settings")
       .set("Authorization", "JWT " + userInfo.accessToken);
     expect(response2.status).toBe(200);
-    await request(app).delete("/user/delete").set("Authorization", "JWT " + userInfo.accessToken);
+    await request(app)
+      .delete("/user/delete")
+      .set("Authorization", "JWT " + userInfo.accessToken);
   });
   test("Get user settings fail - should return 400 if user does not exist", async () => {
     const response3 = await request(app)
@@ -301,7 +310,9 @@ describe("Users Tests", () => {
     expect(response2.status).toBe(401);
   });
   test("Update user fail - should return 400 if user does not exist", async () => {
-    await request(app).delete("/user/delete").set("Authorization", "JWT " + userInfo.accessToken);
+    await request(app)
+      .delete("/user/delete")
+      .set("Authorization", "JWT " + userInfo.accessToken);
     const response3 = await request(app)
       .put("/user/update")
       .set("Authorization", "JWT " + userInfo.accessToken)
@@ -353,6 +364,8 @@ describe("Users Tests", () => {
     expect(response2.status).toBe(200);
     const response6 = await request(app).get(`/post/${postInfo._id}`);
     expect(response6.body.likes.length).toBe(0);
-    await request(app).delete("/user/delete").set("Authorization", "JWT " + userInfo.accessToken);
+    await request(app)
+      .delete("/user/delete")
+      .set("Authorization", "JWT " + userInfo.accessToken);
   });
 });

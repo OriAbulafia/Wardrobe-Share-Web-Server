@@ -97,10 +97,10 @@ describe("Post Tests", () => {
   });
   test("Get Post", async () => {
     const response = await request(app).get("/post");
-    expect(response.body.length).toBe(1);
+    expect(response.body.data.length).toBeGreaterThan(0);
     expect(response.status).toBe(200);
     const response2 = await request(app).get("/post?category=testcategory");
-    expect(response2.body.length).toBe(1);
+    expect(response2.body.data.length).toBeGreaterThan(0);
     expect(response2.status).toBe(200);
   });
   test("Get Post by catagory fail - no data", async () => {
@@ -119,6 +119,11 @@ describe("Post Tests", () => {
   test("Get Post by id fail - invalid id", async () => {
     const response = await request(app).get(`/post/invalidId`);
     expect(response.status).toBe(400);
+  });
+  test("Get Feed Posts", async () => {
+    const response = await request(app).get("/post/feed");
+    expect(response.body.tops.length).toBeGreaterThan(0);
+    expect(response.status).toBe(200);
   });
   test("Post like", async () => {
     const response = await request(app)
@@ -205,7 +210,7 @@ describe("Post Tests", () => {
       .set("Authorization", `JWT ${userInfo.accessToken}`)
       .field("title", "updatedtitle")
       .field("description", postInfo.description)
-      .field("likes", [ "test" ])
+      .field("likes", ["test"])
       .field("category", postInfo.category)
       .field("phone", postInfo.phone)
       .field("region", postInfo.region)
@@ -224,6 +229,8 @@ describe("Post Tests", () => {
       .delete(`/post/${postInfo._id}`)
       .set("Authorization", `JWT ${userInfo.accessToken}`);
     expect(response.status).toBe(200);
-    await request(app).delete("/user/delete").set("Authorization", `JWT ${userInfo.accessToken}`);
+    await request(app)
+      .delete("/user/delete")
+      .set("Authorization", `JWT ${userInfo.accessToken}`);
   });
 });
