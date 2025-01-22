@@ -172,12 +172,10 @@ const likePost = async (req: Request, res: Response): Promise<void> => {
   const p_id = new Types.ObjectId(postId);
 
   if (post.likes.includes(u_id)) {
-    // Unlike the post
     post.likes = post.likes.filter((id) => id.toString() !== userId);
     user.likedPosts = user.likedPosts.filter((id) => id.toString() !== postId);
     flag = true;
   } else {
-    // Like the post
     post.likes.push(u_id);
     user.likedPosts.push(p_id);
   }
