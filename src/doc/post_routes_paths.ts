@@ -142,68 +142,136 @@ const postPaths = {
       },
     },
     get: {
-      summary: "Get all posts and filter",
-      description: "Get all posts and filter by query parameters.",
+      summary: "Get all posts with paging and query parameters",
+      description: "Get all posts with paging and query parameters.",
       tags: ["Posts"],
+      parameters: [
+        {
+          name: "page",
+          in: "query",
+          description: "The page number.",
+          schema: {
+            type: "integer",
+            example: 1,
+          },
+        },
+        {
+          name: "limit",
+          in: "query",
+          description: "The number of items per page.",
+          schema: {
+            type: "integer",
+            example: 20,
+          },
+        },
+        {
+          name: "category",
+          in: "query",
+          description: "The category of the post.",
+          schema: {
+            type: "string",
+            example: "testcategory",
+          },
+        },
+        {
+          name: "region",
+          in: "query",
+          description: "The region of the post.",
+          schema: {
+            type: "string",
+            example: "testregion",
+          },
+        },
+        {
+          name: "city",
+          in: "query",
+          description: "The city of the post.",
+          schema: {
+            type: "string",
+            example: "testcity",
+          },
+        },
+      ],
       responses: {
         200: {
           description: "Successful request.",
           content: {
             "application/json": {
               schema: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    _id: {
-                      type: "string",
-                      example: "60f7b4f3bbedb00000000000",
-                    },
-                    user: {
-                      type: "string",
-                      example: "60f7b4f3bbedb00000000000",
-                    },
-                    title: {
-                      type: "string",
-                      example: "testtitle",
-                    },
-                    description: {
-                      type: "string",
-                      example: "testdescription",
-                    },
-                    picture: {
-                      type: "string",
-                      example: "testimage",
-                    },
-                    likes: {
-                      type: "array",
-                      items: {
-                        type: "string",
+                type: "object",
+                properties: {
+                  total: {
+                    type: "number",
+                    example: 1,
+                  },
+                  page: {
+                    type: "number",
+                    example: 1,
+                  },
+                  limit: {
+                    type: "number",
+                    example: 20,
+                  },
+                  totalPages: {
+                    type: "number",
+                    example: 1,
+                  },
+                  data: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        _id: {
+                          type: "string",
+                          example: "60f7b4f3bbedb00000000000",
+                        },
+                        user: {
+                          type: "string",
+                          example: "60f7b4f3bbedb00000000000",
+                        },
+                        title: {
+                          type: "string",
+                          example: "testtitle",
+                        },
+                        description: {
+                          type: "string",
+                          example: "testdescription",
+                        },
+                        picture: {
+                          type: "string",
+                          example: "testimage",
+                        },
+                        likes: {
+                          type: "array",
+                          items: {
+                            type: "string",
+                          },
+                          example: [],
+                        },
+                        comments: {
+                          type: "array",
+                          items: {
+                            type: "string",
+                          },
+                          example: [],
+                        },
+                        category: {
+                          type: "string",
+                          example: "testcategory",
+                        },
+                        phone: {
+                          type: "string",
+                          example: "testphone",
+                        },
+                        region: {
+                          type: "string",
+                          example: "testregion",
+                        },
+                        city: {
+                          type: "string",
+                          example: "testcity",
+                        },
                       },
-                      example: [],
-                    },
-                    comments: {
-                      type: "array",
-                      items: {
-                        type: "string",
-                      },
-                      example: [],
-                    },
-                    category: {
-                      type: "string",
-                      example: "testcategory",
-                    },
-                    phone: {
-                      type: "string",
-                      example: "testphone",
-                    },
-                    region: {
-                      type: "string",
-                      example: "testregion",
-                    },
-                    city: {
-                      type: "string",
-                      example: "testcity",
                     },
                   },
                 },
@@ -221,6 +289,143 @@ const postPaths = {
                   message: {
                     type: "string",
                     example: "no data found",
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+  "/post/feed": {
+    get: {
+      summary: "Get all 4 newest posts from each category",
+      description: "Get all 4 newest posts from each category.",
+      tags: ["Posts"],
+      responses: {
+        200: {
+          description: "Successful request.",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  category: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        _id: {
+                          type: "string",
+                          example: "60f7b4f3bbedb00000000000",
+                        },
+                        user: {
+                          type: "string",
+                          example: "60f7b4f3bbedb00000000000",
+                        },
+                        title: {
+                          type: "string",
+                          example: "testtitle",
+                        },
+                        description: {
+                          type: "string",
+                          example: "testdescription",
+                        },
+                        picture: {
+                          type: "string",
+                          example: "testimage",
+                        },
+                        likes: {
+                          type: "array",
+                          items: {
+                            type: "string",
+                          },
+                          example: [],
+                        },
+                        comments: {
+                          type: "array",
+                          items: {
+                            type: "string",
+                          },
+                          example: [],
+                        },
+                        category: {
+                          type: "string",
+                          example: "testcategory",
+                        },
+                        phone: {
+                          type: "string",
+                          example: "testphone",
+                        },
+                        region: {
+                          type: "string",
+                          example: "testregion",
+                        },
+                        city: {
+                          type: "string",
+                          example: "testcity",
+                        },
+                      },
+                    },
+                  },
+                  category2: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        _id: {
+                          type: "string",
+                          example: "60f7b4f3bbedb00000000000",
+                        },
+                        user: {
+                          type: "string",
+                          example: "60f7b4f3bbedb00000000000",
+                        },
+                        title: {
+                          type: "string",
+                          example: "testtitle",
+                        },
+                        description: {
+                          type: "string",
+                          example: "testdescription",
+                        },
+                        picture: {
+                          type: "string",
+                          example: "testimage",
+                        },
+                        likes: {
+                          type: "array",
+                          items: {
+                            type: "string",
+                          },
+                          example: [],
+                        },
+                        comments: {
+                          type: "array",
+                          items: {
+                            type: "string",
+                          },
+                          example: [],
+                        },
+                        category: {
+                          type: "string",
+                          example: "testcategory",
+                        },
+                        phone: {
+                          type: "string",
+                          example: "testphone",
+                        },
+                        region: {
+                          type: "string",
+                          example: "testregion",
+                        },
+                        city: {
+                          type: "string",
+                          example: "testcity",
+                        },
+                      },
+                    },
                   },
                 },
               },
