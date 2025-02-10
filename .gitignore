@@ -1,5 +1,10 @@
 .env
+.envprod
 node_modules/
 dist/
 coverage/
 uploads/
+
+client-key.pem
+client.csr
+client-cert.pem

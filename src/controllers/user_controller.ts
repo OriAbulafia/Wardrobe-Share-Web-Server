@@ -5,7 +5,7 @@ import commentModel from "../models/comment_model";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { v4 as uuid } from "uuid";
-import { OAuth2Client } from "google-auth-library";
+import { JWT, JWTOptions, OAuth2Client } from "google-auth-library";
 import { deleteFileFromPath } from "../utils/functions";
 
 type TokenPayload = {
@@ -147,7 +147,7 @@ const generateTokens = (
         random: random,
       },
       process.env.TOKEN_SECRET,
-      { expiresIn: process.env.TOKEN_EXPIRATION }
+      { expiresIn: '1h' }
     );
 
     refreshToken = jwt.sign(
@@ -156,7 +156,7 @@ const generateTokens = (
         random: random,
       },
       process.env.TOKEN_SECRET,
-      { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION }
+      { expiresIn: '30d' }
     );
   }
 
