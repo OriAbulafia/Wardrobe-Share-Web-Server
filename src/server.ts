@@ -12,13 +12,14 @@ import swaggerUI from "swagger-ui-express";
 import specs from "./doc/swagger";
 import "./types/types";
 import cors from "cors";
+import path from 'path';
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // Configure CORS to allow the frontend to communicate with the backend
 app.use(cors({
-  origin: "http://localhost:5173", // Replace with your frontend's origin
+  origin: "*", // Replace with your frontend's origin
   credentials: true, // Allow cookies to be sent
 }));
 
@@ -40,6 +41,14 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 
 // Swagger docs
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
+
+if (process.env.NODE_ENV === 'production') {
+	app.use(express.static(path.join(__dirname, '../../../wardrobe-share-web-client/Client/dist')));
+
+	app.get('*', (req, res) => {
+		res.sendFile(path.join(__dirname, '../../../wardrobe-share-web-client/Client/dist', 'index.html'));
+	});
+}
 
 const initApp = (): Promise<Express> => {
   return new Promise<Express>((resolve, reject) => {

@@ -5,12 +5,14 @@
   "main": "app.js",
   "scripts": {
     "start": "tsc && node ./dist/src/app.js",
-    "dev": "tsc && nodemon ./src/app.ts",
+    "build": "rimraf dist && tsc",
+    "dev": "nodemon ./src/app.ts",
     "test": " tsc && jest --detectOpenHandles --forceExit --coverage --runInBand",
     "testAuth": "tsc && jest --detectOpenHandles --forceExit authmiddleware.test.ts --coverage",
     "testUser": "tsc && jest --detectOpenHandles --forceExit user.test.ts --coverage",
     "testPost": "tsc && jest --detectOpenHandles --forceExit post.test.ts --coverage",
-    "testComment": "tsc && jest --detectOpenHandles --forceExit comment.test.ts --coverage"
+    "testComment": "tsc && jest --detectOpenHandles --forceExit comment.test.ts --coverage",
+    "prod": "cp .envprod .env && tsc -p tsconfig_prod.json && pm2 restart ecosystem.config.js --env production"
   },
   "author": "Wardrobe-Share",
   "license": "ISC",

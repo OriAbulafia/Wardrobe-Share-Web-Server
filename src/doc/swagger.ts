@@ -17,7 +17,12 @@ const options = {
   },
   servers: [
     {
-      url: `http://localhost:3000`,
+      url: "https://node92.cs.colman.ac.il",
+      description: "Production server",
+    },
+    {
+      url: "http://localhost:3000",
+      description: "Local development server",
     },
   ],
   tags: [
