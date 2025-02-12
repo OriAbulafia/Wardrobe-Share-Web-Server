@@ -139,6 +139,15 @@ const deletePost = async (req: Request, res: Response): Promise<void> => {
   const id = req.params.postId;
   try {
     const data = await postModel.findById(id);
+    const user = await userModel.findById(data?.user);
+    user?.likedPosts.forEach(async (post) => {
+      if (post.toString() === id) {
+        user.likedPosts = user.likedPosts.filter(
+          (post) => post.toString() !== id
+        );
+      }
+    });
+    await user?.save();
     await deleteFileFromPath(data?.picture);
     await commentModel.deleteMany({ post: id });
     await postModel.findByIdAndDelete(id);
