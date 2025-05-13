@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "tsc && node ./dist/src/app.js",
-    "build": "rimraf dist && tsc",
+    "build": "npx rimraf dist && tsc",
     "dev": "nodemon ./src/app.ts",
     "test": " tsc && jest --detectOpenHandles --forceExit --coverage --runInBand",
     "testAuth": "tsc && jest --detectOpenHandles --forceExit authmiddleware.test.ts --coverage",
