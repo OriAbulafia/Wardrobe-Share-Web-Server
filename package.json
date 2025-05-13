@@ -12,7 +12,7 @@
     "testUser": "tsc && jest --detectOpenHandles --forceExit user.test.ts --coverage",
     "testPost": "tsc && jest --detectOpenHandles --forceExit post.test.ts --coverage",
     "testComment": "tsc && jest --detectOpenHandles --forceExit comment.test.ts --coverage",
-    "prod": "cp .envprod .env && tsc -p tsconfig_prod.json && pm2 restart ecosystem.config.js --env production"
+    "prod": "cp .env && tsc -p tsconfig_prod.json && pm2 restart ecosystem.config.js --env production"
   },
   "author": "Wardrobe-Share",
   "license": "ISC",
