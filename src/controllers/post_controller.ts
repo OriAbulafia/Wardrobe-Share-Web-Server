@@ -3,7 +3,8 @@ import postModel from "../models/post_model";
 import userModel from "../models/user_model";
 import commentModel from "../models/comment_model";
 import { Types } from "mongoose";
-import { deleteFileFromPath } from "../utils/functions";
+import { uploadToCloudinary, deleteImage } from "../utils/cloudinary";
+import { v4 as uuidv4 } from "uuid";
 
 const createPost = async (req: Request, res: Response) => {
   const id = req.query.userId;
@@ -14,11 +15,19 @@ const createPost = async (req: Request, res: Response) => {
   const phone = req.body.phone;
   const region = req.body.region;
   const city = req.body.city;
-  const picture = req.file ? req.file.path : null;
+
+  let imageUrl = "";
+  if (req.file) {
+    const imageID = uuidv4();
+    imageUrl = await uploadToCloudinary(
+      req.file.buffer,
+      `${process.env.CLOUDINARY_BASE_FOLDER}/posts`,
+      imageID
+    );
+  }
 
   if (!title || !description || !category || !phone || !region || !city) {
     res.status(400).send("Missing required fields");
-    await deleteFileFromPath(req.file?.path);
     return;
   }
 
@@ -30,7 +39,7 @@ const createPost = async (req: Request, res: Response) => {
     phone,
     region,
     city,
-    picture,
+    picture: imageUrl || undefined,
     likes: [],
     comments: [],
   });
@@ -109,20 +118,25 @@ const updatePost = async (req: Request, res: Response): Promise<void> => {
   const comments = req.body.comments;
   if (likes || comments) {
     res.status(403).send("Cannot update likes or comments");
-    await deleteFileFromPath(req.file?.path);
     return;
   }
   const post = await postModel.findOne({ _id: postId });
   if (!post) {
     res.status(400).send("post not found");
-    await deleteFileFromPath(req.file?.path);
     return;
   }
   let picture: string | undefined | null = post.picture;
   if (req.file) {
-    await deleteFileFromPath(post.picture);
-    picture = req.file.path;
-    post.picture = picture;
+    if (post.picture) {
+      await deleteImage(post.picture, true);
+    }
+    const imageID = uuidv4();
+    const imageUrl = await uploadToCloudinary(
+      req.file.buffer,
+      `${process.env.CLOUDINARY_BASE_FOLDER}/posts`,
+      imageID
+    );
+    post.picture = imageUrl;
   }
   if (title) post.title = title;
   if (description) post.description = description;
@@ -148,7 +162,9 @@ const deletePost = async (req: Request, res: Response): Promise<void> => {
       }
     });
     await user?.save();
-    await deleteFileFromPath(data?.picture);
+    if (data?.picture) {
+      await deleteImage(data.picture, true);
+    }
     await commentModel.deleteMany({ post: id });
     await postModel.findByIdAndDelete(id);
     res.send("item deleted");
