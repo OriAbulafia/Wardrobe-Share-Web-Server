@@ -1,5 +1,5 @@
 import initApp from "./server";
-const httpPort = process.env.HTTPPORT;
+const httpPort = process.env.HTTPPORT || 3000;
 const  httpsPort = process.env.HTTPSPORT;
 import http from 'http';
 import https from 'https';
