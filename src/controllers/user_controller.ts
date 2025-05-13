@@ -6,7 +6,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { v4 as uuid } from "uuid";
 import { JWT, JWTOptions, OAuth2Client } from "google-auth-library";
-import { deleteFileFromPath } from "../utils/functions";
+import { uploadToCloudinary, deleteImage } from "../utils/cloudinary";
+import { v4 as uuidv4 } from "uuid";
 
 type TokenPayload = {
   _id: string;
@@ -21,20 +22,27 @@ const register = async (req: Request, res: Response, next: Function) => {
 
   if (!username || !password || !email || !f_name || !l_name) {
     res.status(400).send("missing fields");
-    await deleteFileFromPath(req.file?.path);
     return;
   }
 
   if (await userModel.findOne({ email: email })) {
     res.status(401).send("email already exists");
-    await deleteFileFromPath(req.file?.path);
     return;
   }
   if (await userModel.findOne({ username: username })) {
     res.status(402).send("username already exists");
-    await deleteFileFromPath(req.file?.path);
     return;
   }
+
+   let imageUrl = "";
+    if (req.file) {
+      const imageID = uuidv4();
+      imageUrl = await uploadToCloudinary(
+        req.file.buffer,
+        `${process.env.CLOUDINARY_BASE_FOLDER}/users`,
+        imageID
+      );
+    }
 
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
@@ -45,7 +53,7 @@ const register = async (req: Request, res: Response, next: Function) => {
     email: email,
     f_name: f_name,
     l_name: l_name,
-    picture: req.file ? req.file.path : null,
+    picture: imageUrl || undefined,
     likedPosts: [],
     refreshTokens: [],
   });
@@ -343,7 +351,6 @@ const updateUser = async (req: Request, res: Response) => {
   const user = await userModel.findOne({ _id: userId });
   if (!user) {
     res.status(400).send("user not found");
-    await deleteFileFromPath(req.file?.path);
     return;
   }
   if (username) {
@@ -351,17 +358,23 @@ const updateUser = async (req: Request, res: Response) => {
       const userExists = await userModel.findOne({ username: username });
       if (userExists) {
         res.status(401).send("username already exists");
-        await deleteFileFromPath(req.file?.path);
         return;
       }
       user.username = username;
     }
   }
   let picture: string | undefined | null = user.picture;
-  if (req.file) {
-    await deleteFileFromPath(user.picture);
-    picture = req.file.path;
-    user.picture = picture;
+   if (req.file) {
+    if (user.picture) {
+      await deleteImage(user.picture, true);
+    }
+    const imageID = uuidv4();
+    const imageUrl = await uploadToCloudinary(
+      req.file.buffer,
+      `${process.env.CLOUDINARY_BASE_FOLDER}/users`,
+      imageID
+    );
+    user.picture = imageUrl;
   }
   if (f_name) user.f_name = f_name;
   if (l_name) user.l_name = l_name;
@@ -391,12 +404,16 @@ const deleteUser = async (req: Request, res: Response) => {
 
   const posts = await postModel.find({ user: userId });
   for (let i = 0; i < posts.length; i++) {
-    await deleteFileFromPath(posts[i].picture);
+    if (posts[i].picture) {
+      await deleteImage(posts[i].picture, true);
+    }
     await commentModel.deleteMany({ post: posts[i]._id });
   }
   await postModel.deleteMany({ user: userId });
 
-  await deleteFileFromPath(user.picture);
+  if (user.picture) {
+    await deleteImage(user.picture, true);
+  }
   await commentModel.deleteMany({ user: userId });
   await userModel.deleteOne({ _id: userId });
 
