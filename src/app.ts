@@ -1,36 +1,12 @@
 import initApp from "./server";
-const httpPort = process.env.HTTPPORT || 3000;
-const  httpsPort = process.env.HTTPSPORT;
-import http from 'http';
-import https from 'https';
-import fs from 'fs';
+const port = process.env.PORT || 3000; // Use the PORT provided by Render or fallback to 3000
 
 initApp()
   .then((app) => {
-      if (process.env.NODE_ENV !== 'production') {
-        http.createServer(app).listen(httpPort, () => {
-          console.log(`server is running on port ${httpPort}`);
-        });
-      } else {
-        http.createServer((req, res) => {
-          res.writeHead(301, {
-            Location: 'https://' + req.headers.host + req.url,
-          });
-          res.end();
-        }).listen(80, () => {
-          console.log('Redirecting HTTP to HTTPS');
-        });
-        const options = {
-          key: fs.readFileSync('./client-key.pem'),
-          cert: fs.readFileSync('./client-cert.pem'),
-        };
-        https.createServer(options, app).listen(httpsPort, () => {
-          console.log(`server is running on port ${httpsPort}`);
-        });
-      }
+    app.listen(port, () => {
+      console.log(`Server is running on port ${port}`);
+    });
   })
   .catch(() => {
-    console.log("Error Fail starting the server");
+    console.log("Error starting the server");
   });
-
-
